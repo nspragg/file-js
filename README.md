@@ -215,6 +215,38 @@ Synchronous version of `.lastModified()`
 ### `.sizeSync() -> Promise`
 Synchronous version of `.size()`
 
+### `.isWritable() -> Promise`
+
+##### Parameters
+* None
+
+##### Returns
+*  If the Promise fulfils, the fulfilment value is true is the file has write permissions
+
+### `.isWritableSync() -> Promise`
+Synchronous version of `.isWritable()`
+
+### `.isReadable() -> Promise`
+
+##### Parameters
+* None
+
+##### Returns
+*  If the Promise fulfils, the fulfilment value is true is the file has read permissions
+
+### `.isReadableSync() -> Promise`
+Synchronous version of `.isReadable()`
+
+### `.isExecutable() -> Promise`
+
+##### Parameters
+* None
+
+##### Returns
+*  If the Promise fulfils, the fulfilment value is true is the file is executable
+
+### `.isExecutableSync() -> Promise`
+Synchronous version of `.isExecutable()`
 
 ### `.getName() -> String`
 
