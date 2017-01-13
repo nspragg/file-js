@@ -36,6 +36,14 @@ class File {
     return pathname.split(path.sep).length - 1;
   }
 
+  _access(permission) {
+    let hasPermission = true;
+
+    return fsp.accessAsync(this._pathname, permission)
+      .catch(() => hasPermission = false)
+      .then(() => hasPermission);
+  }
+
   isDirectorySync() {
     return this._getStatsSync().isDirectory();
   }
@@ -119,6 +127,18 @@ class File {
 
   sizeSync() {
     return this._getStatsSync().size;
+  }
+
+  isWritable() {
+    return this._access(fs.W_OK);
+  }
+
+  isReadable() {
+    return this._access(fs.R_OK);
+  }
+
+  isExecutable() {
+    return this._access(fs.X_OK);
   }
 }
 

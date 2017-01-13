@@ -398,4 +398,50 @@ describe('File', () => {
       assert.equal(file.getName(), getAbsolutePath('dates/a.txt'));
     });
   });
+
+  describe('.isWritable', () => {
+    it('returns true when the file has write permission', () => {
+      const file = File.create(getAbsolutePath('justFiles/a.json'));
+      file.isWritable()
+        .then((isWritable) => {
+          assert.strictEqual(isWritable, true);
+        });
+    });
+
+    it('returns false when the file does not have write permission', () => {
+      const file = File.create(getAbsolutePath('permissions/notWritable.json'));
+      file.isWritable()
+        .then((isWritable) => {
+          assert.strictEqual(isWritable, false);
+        });
+    });
+  });
+
+  describe('.isReadable', () => {
+    it('returns true when the file has read permission', () => {
+      const file = File.create(getAbsolutePath('permissions/readWrite.json'));
+      file.isReadable()
+        .then((isReadable) => {
+          assert.strictEqual(isReadable, true);
+        });
+    });
+  });
+
+  describe('.isExecutable', () => {
+    it('returns true when the file has read permission', () => {
+      const file = File.create(getAbsolutePath('permissions/executable.sh'));
+      file.isReadable()
+        .then((isExecutable) => {
+          assert.strictEqual(isExecutable, true);
+        });
+    });
+
+    it('returns false when the file does not have read permission', () => {
+      const file = File.create(getAbsolutePath('permissions/notExecutable.sh'));
+      file.isExecutable()
+        .then((isExecutable) => {
+          assert.strictEqual(isExecutable, false);
+        });
+    });
+  });
 });
