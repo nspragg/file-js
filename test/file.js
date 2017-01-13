@@ -122,6 +122,7 @@ describe('File', () => {
       const visiblePaths = [
         './test/fixtures/visibility/visible.json',
         './test/fixtures/visibility/.hidden/visible.json',
+        './test/fixtures/visibility/visible'
       ];
       visiblePaths.forEach((path) => {
         const file = File.create(path);
@@ -139,7 +140,7 @@ describe('File', () => {
     });
 
     it('returns false when the file is visible', () => {
-      const file = File.create('./test/fixtures/visibility/visible.json');
+      const file = File.create('./test/fixtures/visibility/');
       file.isHidden((isHidden) => {
         assert.strictEqual(isHidden, false);
       });
