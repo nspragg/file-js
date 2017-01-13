@@ -390,4 +390,11 @@ describe('File', () => {
       assert.equal(pathname.sizeSync(), 10);
     });
   });
+
+  describe('.getName', () => {
+    it('returns the pathname representation by the object', () => {
+      const file = File.create(getAbsolutePath('dates/a.txt'));
+      assert.equal(file.getName(), getAbsolutePath('dates/a.txt'));
+    });
+  });
 });
