@@ -72,6 +72,24 @@ const dir = File.create('myDirectory');
 dir.getFiles().each(console.log);
 ```
 
+#### Check permissions
+
+Check that a pathname has write permission:
+```js
+const file = File.create('myFile');
+if (file.isWritable()) {
+  console.log(`Able to write to ${file.getName()}`);
+}
+```
+
+Check that a pathname is executable:
+```js
+const file = File.create('myFile');
+if (file.isExecutable()) {
+  console.log(`Able to execute ${file.getName()}`);
+}
+```
+
 #### Pathname changes and access
 
 Get the last time a pathname was modified:
