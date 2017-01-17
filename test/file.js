@@ -460,7 +460,7 @@ describe('File', () => {
     });
   });
 
-  describe('.delete', () => {
+  describe.skip('.delete', () => {
     const fileToDelete = getFixturePath('delete/a.txt');
     beforeEach(() => {
       createFile(fileToDelete, {
