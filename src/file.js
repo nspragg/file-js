@@ -13,6 +13,7 @@ function joinWith(dir) {
 
 class File {
   constructor(pathname) {
+    this._dir = process.cwd();
     this._pathname = pathname;
   }
 
@@ -100,6 +101,17 @@ class File {
 
   getName() {
     return this._pathname;
+  }
+
+  getAbsolutePath() {
+    if (path.isAbsolute(this._pathname)) {
+      return this._pathname;
+    }
+    return [this._dir, this._pathname].join(path.sep);
+  }
+
+  getCanonicalPath() {
+    return path.normalize(this.getAbsolutePath());
   }
 
   getPathExtension() {

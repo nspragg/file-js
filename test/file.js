@@ -7,12 +7,20 @@ import sinon from 'sinon';
 
 const sandbox = sinon.sandbox.create();
 
-function getAbsolutePath(file) {
+function getFixturePath(file) {
   return path.join(__dirname + '/fixtures/', file);
 }
 
+function getAbsolutePath(relativePath) {
+  return process.cwd() + '/' + relativePath;
+}
+
+function getCanonicalPath(relativePath) {
+  return path.normalize(getAbsolutePath(relativePath));
+}
+
 function qualifyNames(names) {
-  return names.map(getAbsolutePath);
+  return names.map(getFixturePath);
 }
 
 function formatDate(date) {
@@ -33,19 +41,19 @@ function deleteFile(fname) {
 describe('File', () => {
   describe('.isDirectorySync', () => {
     it('returns true when a pathname is a directory', () => {
-      const file = File.create(getAbsolutePath('/justFiles'));
+      const file = File.create(getFixturePath('/justFiles'));
       assert(file.isDirectorySync());
     });
 
     it('returns false when a pathname is not a directory', () => {
-      const file = File.create(getAbsolutePath('/justFiles/a.json'));
+      const file = File.create(getFixturePath('/justFiles/a.json'));
       assert(!file.isDirectorySync());
     });
   });
 
   describe('.isDirectory', () => {
     it('returns true when a pathname is a directory', () => {
-      const file = File.create(getAbsolutePath('/justFiles'));
+      const file = File.create(getFixturePath('/justFiles'));
       return file.isDirectory()
         .then((isDirectory) => {
           return assert(isDirectory);
@@ -53,7 +61,7 @@ describe('File', () => {
     });
 
     it('returns false when a pathname is not a directory', () => {
-      const file = File.create(getAbsolutePath('/justFiles/a.json'));
+      const file = File.create(getFixturePath('/justFiles/a.json'));
       return file.isDirectory()
         .then((isDirectory) => {
           return assert(!isDirectory);
@@ -63,7 +71,7 @@ describe('File', () => {
 
   describe('.getFilesSync', () => {
     it('returns a list of files for a given directory', () => {
-      const file = File.create(getAbsolutePath('/justFiles'));
+      const file = File.create(getFixturePath('/justFiles'));
       const files = file.getFilesSync();
       const expected = qualifyNames([
         'justFiles/a.json',
@@ -75,7 +83,7 @@ describe('File', () => {
     });
 
     it('returns null when pathname is not a directory', () => {
-      const file = File.create(getAbsolutePath('/justFiles/a.json'));
+      const file = File.create(getFixturePath('/justFiles/a.json'));
       const files = file.getFilesSync();
       assert.strictEqual(files, null);
     });
@@ -83,7 +91,7 @@ describe('File', () => {
 
   describe('.getFiles', () => {
     it('returns a list of files for a given directory', () => {
-      const file = File.create(getAbsolutePath('/justFiles'));
+      const file = File.create(getFixturePath('/justFiles'));
       const files = file.getFiles();
       const expected = qualifyNames([
         'justFiles/a.json',
@@ -98,7 +106,7 @@ describe('File', () => {
     });
 
     it('returns null when pathname is not a directory', () => {
-      const file = File.create(getAbsolutePath('/justFiles/a.json'));
+      const file = File.create(getFixturePath('/justFiles/a.json'));
       const files = file.getFiles();
       files.then((list) => {
         assert.strictEqual(list, null);
@@ -161,12 +169,12 @@ describe('File', () => {
 
   describe('.getPathExtension', () => {
     it('returns the extension for a file', () => {
-      const file = File.create(getAbsolutePath('/justFiles/a.json'));
+      const file = File.create(getFixturePath('/justFiles/a.json'));
       assert.equal(file.getPathExtension(), 'json');
     });
 
     it('returns the extension for a directory', () => {
-      const file = File.create(getAbsolutePath('/test.d'));
+      const file = File.create(getFixturePath('/test.d'));
       assert.equal(file.getPathExtension(), 'd');
     });
   });
@@ -199,32 +207,32 @@ describe('File', () => {
 
   describe('.lastModified', () => {
     before(() => {
-      fs.mkdirSync(getAbsolutePath('dates'));
+      fs.mkdirSync(getFixturePath('dates'));
     });
 
     after(() => {
-      fs.rmdirSync(getAbsolutePath('dates'));
+      fs.rmdirSync(getFixturePath('dates'));
     });
 
     const files = [
       {
-        name: getAbsolutePath('dates/a.txt'),
+        name: getFixturePath('dates/a.txt'),
         modified: 10
       },
       {
-        name: getAbsolutePath('dates/w.txt'),
+        name: getFixturePath('dates/w.txt'),
         modified: 9
       },
       {
-        name: getAbsolutePath('dates/x.txt'),
+        name: getFixturePath('dates/x.txt'),
         modified: 2
       },
       {
-        name: getAbsolutePath('dates/y.txt'),
+        name: getFixturePath('dates/y.txt'),
         modified: 1
       },
       {
-        name: getAbsolutePath('dates/z.txt'),
+        name: getFixturePath('dates/z.txt'),
         modified: 0
       }
     ];
@@ -256,32 +264,32 @@ describe('File', () => {
 
   describe('.lastAccessed', () => {
     before(() => {
-      fs.mkdirSync(getAbsolutePath('dates'));
+      fs.mkdirSync(getFixturePath('dates'));
     });
 
     after(() => {
-      fs.rmdirSync(getAbsolutePath('dates'));
+      fs.rmdirSync(getFixturePath('dates'));
     });
 
     const files = [
       {
-        name: getAbsolutePath('dates/a.txt'),
+        name: getFixturePath('dates/a.txt'),
         accessed: 10
       },
       {
-        name: getAbsolutePath('dates/w.txt'),
+        name: getFixturePath('dates/w.txt'),
         accessed: 9
       },
       {
-        name: getAbsolutePath('dates/x.txt'),
+        name: getFixturePath('dates/x.txt'),
         accessed: 2
       },
       {
-        name: getAbsolutePath('dates/y.txt'),
+        name: getFixturePath('dates/y.txt'),
         accessed: 1
       },
       {
-        name: getAbsolutePath('dates/z.txt'),
+        name: getFixturePath('dates/z.txt'),
         accessed: 0
       }
     ];
@@ -315,7 +323,7 @@ describe('File', () => {
     let statSync;
 
     before(() => {
-      fs.mkdirSync(getAbsolutePath('dates'));
+      fs.mkdirSync(getFixturePath('dates'));
 
       statSync = sandbox.stub(fs, 'statSync');
       statSync.returns({
@@ -326,29 +334,29 @@ describe('File', () => {
     });
 
     after(() => {
-      fs.rmdirSync(getAbsolutePath('dates'));
+      fs.rmdirSync(getFixturePath('dates'));
       sandbox.restore();
     });
 
     const files = [
       {
-        name: getAbsolutePath('dates/a.txt'),
+        name: getFixturePath('dates/a.txt'),
         changed: 10
       },
       {
-        name: getAbsolutePath('dates/w.txt'),
+        name: getFixturePath('dates/w.txt'),
         changed: 9
       },
       {
-        name: getAbsolutePath('dates/x.txt'),
+        name: getFixturePath('dates/x.txt'),
         changed: 2
       },
       {
-        name: getAbsolutePath('dates/y.txt'),
+        name: getFixturePath('dates/y.txt'),
         changed: 1
       },
       {
-        name: getAbsolutePath('dates/z.txt'),
+        name: getFixturePath('dates/z.txt'),
         changed: 0
       }
     ];
@@ -387,21 +395,21 @@ describe('File', () => {
 
   describe('.size', () => {
     it('returns the size of a pathname in bytes', () => {
-      const pathname = File.create(getAbsolutePath('sizes/10b.txt'));
+      const pathname = File.create(getFixturePath('sizes/10b.txt'));
       assert.equal(pathname.sizeSync(), 10);
     });
   });
 
   describe('.getName', () => {
     it('returns the pathname representation by the object', () => {
-      const file = File.create(getAbsolutePath('dates/a.txt'));
-      assert.equal(file.getName(), getAbsolutePath('dates/a.txt'));
+      const file = File.create(getFixturePath('dates/a.txt'));
+      assert.equal(file.getName(), getFixturePath('dates/a.txt'));
     });
   });
 
   describe('.isWritable', () => {
     it('returns true when the file has write permission', () => {
-      const file = File.create(getAbsolutePath('justFiles/a.json'));
+      const file = File.create(getFixturePath('justFiles/a.json'));
       file.isWritable()
         .then((isWritable) => {
           assert.strictEqual(isWritable, true);
@@ -409,7 +417,7 @@ describe('File', () => {
     });
 
     it('returns false when the file does not have write permission', () => {
-      const file = File.create(getAbsolutePath('permissions/notWritable.json'));
+      const file = File.create(getFixturePath('permissions/notWritable.json'));
       file.isWritable()
         .then((isWritable) => {
           assert.strictEqual(isWritable, false);
@@ -419,7 +427,7 @@ describe('File', () => {
 
   describe('.isReadable', () => {
     it('returns true when the file has read permission', () => {
-      const file = File.create(getAbsolutePath('permissions/readWrite.json'));
+      const file = File.create(getFixturePath('permissions/readWrite.json'));
       file.isReadable()
         .then((isReadable) => {
           assert.strictEqual(isReadable, true);
@@ -429,7 +437,7 @@ describe('File', () => {
 
   describe('.isExecutable', () => {
     it('returns true when the file has read permission', () => {
-      const file = File.create(getAbsolutePath('permissions/executable.sh'));
+      const file = File.create(getFixturePath('permissions/executable.sh'));
       file.isReadable()
         .then((isExecutable) => {
           assert.strictEqual(isExecutable, true);
@@ -437,11 +445,57 @@ describe('File', () => {
     });
 
     it('returns false when the file does not have read permission', () => {
-      const file = File.create(getAbsolutePath('permissions/notExecutable.sh'));
+      const file = File.create(getFixturePath('permissions/notExecutable.sh'));
       file.isExecutable()
         .then((isExecutable) => {
           assert.strictEqual(isExecutable, false);
         });
+    });
+  });
+
+  describe('.delete', () => {
+    const file = File.create(getFixturePath('justFiles/a.json'));
+
+  });
+
+  describe('.createNewFile', () => {
+
+  });
+
+  describe('.getFixturePath', () => {
+    it('returns the absolute path for a relative pathname', () => {
+      const relativePath = './test/fixtures/justFiles/a.json';
+      const file = File.create(relativePath);
+      assert.equal(file.getAbsolutePath(), getAbsolutePath('./test/fixtures/justFiles/a.json'));
+    });
+
+    it('returns the absolute path for an absolute pathname', () => {
+      const absolutePath = getAbsolutePath('./test/fixtures/justFiles/a.json');
+      const file = File.create(absolutePath);
+      assert.equal(file.getAbsolutePath(), absolutePath);
+    });
+  });
+
+  describe('.getCanonicalPath', () => {
+    it('returns the canonical path for a relative pathname', () => {
+      const relativePath = './test/fixtures/justFiles/a.json';
+      const file = File.create(relativePath);
+      assert.equal(file.getCanonicalPath(), getCanonicalPath('./test/fixtures/justFiles/a.json'));
+    });
+
+    it('returns the canonical path for an absolute pathname', () => {
+      const absolutePath = getAbsolutePath('./test/fixtures/justFiles/a.json');
+      const canonicalPath = getCanonicalPath('./test/fixtures/justFiles/a.json');
+
+      const file = File.create(absolutePath);
+      assert.equal(file.getCanonicalPath(), canonicalPath);
+    });
+  });
+
+  describe('.getName', () => {
+    it('returns the pathname representation by the object', () => {
+      const file = File.create(getFixturePath('dates/a.txt'));
+      assert.equal(file.getName(), getFixturePath('dates/a.txt'));
     });
   });
 });
