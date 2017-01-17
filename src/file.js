@@ -152,6 +152,10 @@ class File {
   isExecutable() {
     return this._access(fs.X_OK);
   }
+
+  delete() {
+    return fsp.unlinkAsync(this._pathname);
+  }
 }
 
 module.exports.create = (filename) => {

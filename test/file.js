@@ -38,6 +38,13 @@ function deleteFile(fname) {
   return fs.unlinkSync(fname);
 }
 
+function deleteFileIfExists(fname) {
+  try {
+    fs.unlinkSync(fname);
+    deleteFile(fname);
+  } catch (e) {}
+}
+
 describe('File', () => {
   describe('.isDirectorySync', () => {
     it('returns true when a pathname is a directory', () => {
@@ -454,12 +461,28 @@ describe('File', () => {
   });
 
   describe('.delete', () => {
-    const file = File.create(getFixturePath('justFiles/a.json'));
+    const fileToDelete = getFixturePath('delete/a.txt');
+    beforeEach(() => {
+      createFile(fileToDelete, {
+        duration: 1,
+        modifier: 'hours'
+      });
+    });
 
-  });
+    afterEach(() => {
+      deleteFileIfExists(fileToDelete);
+    });
 
-  describe('.createNewFile', () => {
+    it('deletes a file that exists', () => {
+      const file = File.create(getFixturePath('delete/a.txt'));
 
+      return file.delete()
+        .then(() => {
+          assert.throws(() => {
+            fs.statSync(getFixturePath('delete/a.txt'));
+          }, /ENOENT/);
+        });
+    });
   });
 
   describe('.getFixturePath', () => {
