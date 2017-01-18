@@ -4,6 +4,9 @@ import path from 'path';
 import File from '../lib/file';
 import moment from 'moment';
 import sinon from 'sinon';
+import Promise from 'bluebird';
+
+import lockfile from '../lib/lock';
 
 const sandbox = sinon.sandbox.create();
 
@@ -523,6 +526,27 @@ describe('File', () => {
     it('returns the pathname representation by the object', () => {
       const file = File.create(getFixturePath('dates/a.txt'));
       assert.equal(file.getName(), getFixturePath('dates/a.txt'));
+    });
+  });
+
+  describe('.withLock', () => {
+    beforeEach(() => {
+      sandbox.stub(lockfile, 'lockAsync').returns(Promise.resolve());
+      sandbox.stub(lockfile, 'unlockAsync').returns(Promise.resolve());
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('executes a given function whilst managing a file lock', () => {
+      const fn = sinon.spy();
+      const file = File.create('justFiles/a.json');
+
+      file.withLock(fn)
+        .then(() => {
+          sinon.assert.callOrder(lockfile.lockAsync, fn, lockfile.unlockAsync);
+        });
     });
   });
 });

@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import fileGlob from 'minimatch';
 
+import lock from './lock';
+
 const fsp = Promise.promisifyAll(fs);
 
 function joinWith(dir) {
@@ -155,6 +157,16 @@ class File {
 
   delete() {
     return fsp.unlinkAsync(this._pathname);
+  }
+
+  withLock(fn) {
+    return lock.lockAsync(this._pathname)
+      .then(() => {
+        fn();
+      })
+      .finally(() => {
+        return lock.unlockAsync(this._pathname);
+      });
   }
 }
 
