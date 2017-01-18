@@ -76,10 +76,10 @@ describe('File', () => {
     });
   });
 
-  describe('.getFilesSync', () => {
+  describe('.getListSync', () => {
     it('returns a list of files for a given directory', () => {
       const file = File.create(getFixturePath('/justFiles'));
-      const files = file.getFilesSync();
+      const files = file.getListSync();
       const expected = qualifyNames([
         'justFiles/a.json',
         'justFiles/b.json',
@@ -91,15 +91,15 @@ describe('File', () => {
 
     it('returns null when pathname is not a directory', () => {
       const file = File.create(getFixturePath('/justFiles/a.json'));
-      const files = file.getFilesSync();
+      const files = file.getListSync();
       assert.strictEqual(files, null);
     });
   });
 
-  describe('.getFiles', () => {
+  describe('.getList', () => {
     it('returns a list of files for a given directory', () => {
       const file = File.create(getFixturePath('/justFiles'));
-      const files = file.getFiles();
+      const files = file.getList();
       const expected = qualifyNames([
         'justFiles/a.json',
         'justFiles/b.json',
@@ -114,7 +114,7 @@ describe('File', () => {
 
     it('returns null when pathname is not a directory', () => {
       const file = File.create(getFixturePath('/justFiles/a.json'));
-      const files = file.getFiles();
+      const files = file.getList();
       files.then((list) => {
         assert.strictEqual(list, null);
       });

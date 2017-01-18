@@ -73,7 +73,7 @@ class File {
       });
   }
 
-  getFilesSync() {
+  getListSync() {
     if (this.isDirectorySync()) {
       return fs.readdirSync(this._pathname).map((file) => {
         return path.join(this._pathname, file);
@@ -82,7 +82,7 @@ class File {
     return null;
   }
 
-  getFiles() {
+  getList() {
     return this.isDirectory()
       .then((isDirectory) => {
         if (isDirectory) {
