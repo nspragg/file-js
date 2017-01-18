@@ -461,6 +461,14 @@ describe('File', () => {
   });
 
   describe('.delete', () => {
+    before(() => {
+      fs.mkdirSync(getFixturePath('delete'));
+    });
+
+    after(() => {
+      fs.rmdirSync(getFixturePath('delete'));
+    });
+
     const fileToDelete = getFixturePath('delete/a.txt');
     beforeEach(() => {
       createFile(fileToDelete, {
