@@ -460,17 +460,13 @@ describe('File', () => {
     });
   });
 
-  describe.skip('.delete', () => {
+  describe('.delete', () => {
     const fileToDelete = getFixturePath('delete/a.txt');
     beforeEach(() => {
       createFile(fileToDelete, {
         duration: 1,
         modifier: 'hours'
       });
-    });
-
-    afterEach(() => {
-      deleteFileIfExists(fileToDelete);
     });
 
     it('deletes a file that exists', () => {
