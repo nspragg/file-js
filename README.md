@@ -22,9 +22,16 @@ npm install --save file-js
 ## Features
 
 * File glob matching
-* File matching with regular expressions
-* Supports promises and callbacks
+* File listings
+* File locking
+* Assert file permissions
+* Supports promises
 * Supports synchronous and asynchronous methods
+
+## Coming soon
+
+* File matching with regular expressions
+* Support for callbacks
 
 ## Demo
 
@@ -72,6 +79,21 @@ const dir = File.create('myDirectory');
 dir.getFiles().each(console.log);
 ```
 
+#### File locking
+
+Perform operations on a file whilst locked:
+```js
+const fs = require('fs');
+const file = File.create('myFile');
+
+file.withLock(() => {
+  file.isWritable((w_ok) => {
+    if (w_ok) {
+      fs.writeFileSync(file.getAbsolutePath(), 'my data\n');
+    }
+  });
+});
+```
 #### Check permissions
 
 Check that a pathname has write permission:
