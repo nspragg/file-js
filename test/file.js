@@ -78,6 +78,36 @@ describe('File', () => {
     });
   });
 
+  describe('.isFileSync', () => {
+    it('returns true when a pathname is a file', () => {
+      const file = File.create(getFixturePath('/justFiles/a.json'));
+      assert(file.isFileSync());
+    });
+
+    it('returns false when a pathname is not a file', () => {
+      const file = File.create(getFixturePath('/justFiles'));
+      assert(!file.isFileSync());
+    });
+  });
+
+  describe('.isFile', () => {
+    it('returns true when a pathname is a file', () => {
+      const file = File.create(getFixturePath('/justFiles/a.json'));
+      return file.isFile()
+        .then((isFile) => {
+          return assert(isFile);
+        });
+    });
+
+    it('returns false when a pathname is not a file', () => {
+      const file = File.create(getFixturePath('/justFiles'));
+      return file.isFile()
+        .then((isFile) => {
+          return assert(!isFile);
+        });
+    });
+  });
+
   describe('.getListSync', () => {
     it('returns a list of files for a given directory', () => {
       const file = File.create(getFixturePath('/justFiles'));

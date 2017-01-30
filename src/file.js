@@ -29,11 +29,11 @@ class File {
     return fsp.statAsync(this._pathname);
   }
 
-  _isFile() {
+  _isHiddenFile() {
     return (/^\./).test(path.basename(this._pathname));
   }
 
-  _isDirectory() {
+  _isHiddenDirectory() {
     return (/(^|\/)\.[^\/\.]/g).test(this._pathname);
   }
 
@@ -49,31 +49,40 @@ class File {
       .then(() => hasPermission);
   }
 
+  _checkAsyncStats(type) {
+    return this._getStats().then((stats) => stats[type]());
+  }
+
   isDirectorySync() {
     return this._getStatsSync().isDirectory();
   }
 
+  isFileSync() {
+    return this._getStatsSync().isFile();
+  }
+
   isDirectory() {
-    return this._getStats()
-      .then((stats) => {
-        return stats.isDirectory();
-      });
+    return this._checkAsyncStats('isDirectory');
+  }
+
+  isFile() {
+    return this._checkAsyncStats('isFile');
   }
 
   isHiddenSync() {
     if (!this.isDirectorySync()) {
-      return this._isFile();
+      return this._isHiddenFile();
     }
-    return this._isDirectory();
+    return this._isHiddenDirectory();
   }
 
   isHidden() {
     this.isDirectory()
       .then((isDirectory) => {
         if (!isDirectory) {
-          return this._isFile();
+          return this._isHiddenFile();
         }
-        return this._isDirectory();
+        return this._isHiddenDirectory();
       });
   }
 

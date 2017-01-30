@@ -99,17 +99,21 @@ file.withLock(() => {
 Check that a pathname has write permission:
 ```js
 const file = File.create('myFile');
-if (file.isWritable()) {
-  console.log(`Able to write to ${file.getName()}`);
-}
+file.isWritable((isWritable) => {
+  if (isWritable) {
+    console.log(`Able to write to ${file.getName()}`);
+  }  
+});
 ```
 
 Check that a pathname is executable:
 ```js
 const file = File.create('myFile');
-if (file.isExecutable()) {
-  console.log(`Able to execute ${file.getName()}`);
-}
+file.isExecutable((isExecutable) => {
+  if (isExecutable) {
+    console.log(`Able to execute ${file.getName()}`);
+  }
+});
 ```
 
 #### Pathname changes and access
