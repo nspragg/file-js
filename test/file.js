@@ -1,4 +1,3 @@
-import fs from 'fs';
 import assert from 'assert';
 import path from 'path';
 import File from '../lib/file';
@@ -6,7 +5,7 @@ import moment from 'moment';
 import sinon from 'sinon';
 import Promise from 'bluebird';
 
-import lockfile from '../lib/lock';
+import fs from '../lib/fs';
 
 const sandbox = sinon.sandbox.create();
 
@@ -531,8 +530,8 @@ describe('File', () => {
 
   describe('.withLock', () => {
     beforeEach(() => {
-      sandbox.stub(lockfile, 'lockAsync').returns(Promise.resolve());
-      sandbox.stub(lockfile, 'unlockAsync').returns(Promise.resolve());
+      sandbox.stub(fs, 'flockAsync').returns(Promise.resolve());
+      sandbox.stub(fs, 'openAsync').returns(Promise.resolve(8000));
     });
 
     afterEach(() => {
@@ -541,11 +540,13 @@ describe('File', () => {
 
     it('executes a given function whilst managing a file lock', () => {
       const fn = sinon.spy();
-      const file = File.create('justFiles/a.json');
+      const file = File.create(getAbsolutePath('./test/fixtures/justFiles/a.json'));
 
-      file.withLock(fn)
+      return file.withLock(fn)
         .then(() => {
-          sinon.assert.callOrder(lockfile.lockAsync, fn, lockfile.unlockAsync);
+          sinon.assert.callOrder(
+            fs.flockAsync.withArgs(8000, 'ex'),
+            fs.flockAsync.withArgs(8000, 'un'));
         });
     });
   });

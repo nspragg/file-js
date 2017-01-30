@@ -1,11 +1,13 @@
 import Promise from 'bluebird';
-import fs from 'fs';
 import path from 'path';
 import fileGlob from 'minimatch';
 
-import lock from './lock';
+import fs from './fs';
 
 const fsp = Promise.promisifyAll(fs);
+const LOCK_EX = 'ex';
+const LOCK_UN = 'un';
+const READ_ONLY = 'r';
 
 function joinWith(dir) {
   return (file) => {
@@ -160,12 +162,14 @@ class File {
   }
 
   withLock(fn) {
-    return lock.lockAsync(this._pathname)
-      .then(() => {
-        fn();
+    let fd;
+    return fs.openAsync(this._pathname, READ_ONLY)
+      .then((_fd) => {
+        fd = _fd;
+        return fs.flockAsync(fd, LOCK_EX).then(() => fn());
       })
       .finally(() => {
-        return lock.unlockAsync(this._pathname);
+        fs.flockAsync(fd, LOCK_UN);
       });
   }
 }
