@@ -34,6 +34,7 @@ npm install --save file-js
 * Create temp files
 * Create directories via `.mkdir` and `.mkdirp`
 * Assert existence of files via `.exists()`
+* Support file URI
 * Support for callbacks
 
 ## Demo
