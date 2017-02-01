@@ -40,10 +40,6 @@ npm install --save file-js
 * Support file URI
 * Support for callbacks
 
-## Demo
-
-<img src="" width="600"/>
-
 ## Usage
 
 ```js
