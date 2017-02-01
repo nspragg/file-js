@@ -3,6 +3,7 @@ import path from 'path';
 import fileGlob from 'minimatch';
 
 import fs from './fs';
+import fsExt from './fsext';
 
 const fsp = Promise.promisifyAll(fs);
 const LOCK_EX = 'ex';
@@ -175,10 +176,10 @@ class File {
     return fs.openAsync(this._pathname, READ_ONLY)
       .then((_fd) => {
         fd = _fd;
-        return fs.flockAsync(fd, LOCK_EX).then(() => fn());
+        return fsExt.flockAsync(fd, LOCK_EX).then(() => fn());
       })
       .finally(() => {
-        fs.flockAsync(fd, LOCK_UN);
+        fsExt.flockAsync(fd, LOCK_UN);
       });
   }
 }
