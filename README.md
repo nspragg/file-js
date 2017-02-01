@@ -46,7 +46,7 @@ npm install --save file-js
 const File = require('file-js');
 
 const file = File.create('myFile');
-file.getFiles()
+file.getList()
   then((files) => {
     files.each(console.log);
   });
@@ -71,7 +71,7 @@ if (pathname.isFile()) {
 Synchronously list files:
 ```js
 const dir = File.create('myDirectory');
-const files = dir.getFilesSync()
+const files = dir.getListSync()
 
 console.log(files.forEach(console.log));
 ```
@@ -79,7 +79,7 @@ console.log(files.forEach(console.log));
 Asynchronously list files:
 ```js
 const dir = File.create('myDirectory');
-dir.getFiles().each(console.log);
+dir.getList().each(console.log);
 ```
 
 #### File locking
@@ -154,7 +154,7 @@ Get list of files for a directory:
 
 ```js
 const dir = File.create('myDir');
-dir.getFiles((err, files) => {
+dir.getList((err, files) => {
   if (err) return console.error(err);
 
   console.log(files);
@@ -174,7 +174,7 @@ Returns a File instance.
 
 ## Instance methods
 
-### `.getFiles() -> Promise`
+### `.getList() -> Promise`
 
 ##### Parameters
 * None
@@ -182,8 +182,8 @@ Returns a File instance.
 ##### Returns
 *  If the Promise fulfils, the fulfilment value is an array of files in the directory or null if it's a file
 
-### `.getFilesSync() -> Promise`
-Synchronous version of `.getFiles()`
+### `.getListSync() -> Promise`
+Synchronous version of `.getList()`
 
 ### `.isDirectory() -> Promise`
 
