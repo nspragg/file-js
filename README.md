@@ -31,6 +31,13 @@ npm install --save file-js
 ## Coming soon
 
 * File matching with regular expressions
+* Create temp files
+* Create directories via `.mkdir` and `.mkdirp`
+* Assert existence of files via `.exists()`
+* Watch file
+* Change permissions
+* Rename
+* Support file URI
 * Support for callbacks
 
 ## Demo
