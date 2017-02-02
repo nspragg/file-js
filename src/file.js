@@ -3,12 +3,9 @@ import path from 'path';
 import fileGlob from 'minimatch';
 
 import fs from './fs';
-import fsExt from './fsext';
+import filelock from './lock';
 
 const fsp = Promise.promisifyAll(fs);
-const LOCK_EX = 'ex';
-const LOCK_UN = 'un';
-const READ_ONLY = 'r';
 
 function joinWith(dir) {
   return (file) => {
@@ -172,14 +169,12 @@ class File {
   }
 
   withLock(fn) {
-    let fd;
-    return fs.openAsync(this._pathname, READ_ONLY)
-      .then((_fd) => {
-        fd = _fd;
-        return fsExt.flockAsync(fd, LOCK_EX).then(() => fn());
+    return filelock.lockAsync(this._pathname)
+      .then(() => {
+        return fn();
       })
       .finally(() => {
-        fsExt.flockAsync(fd, LOCK_UN);
+        filelock.unlockAsync(this._pathname);
       });
   }
 }

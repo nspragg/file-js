@@ -6,7 +6,7 @@ import sinon from 'sinon';
 import Promise from 'bluebird';
 
 import fs from '../lib/fs';
-import fsExt from '../lib/fsext';
+import filelock from '../lib/lock';
 
 const sandbox = sinon.sandbox.create();
 
@@ -561,8 +561,8 @@ describe('File', () => {
 
   describe('.withLock', () => {
     beforeEach(() => {
-      sandbox.stub(fsExt, 'flockAsync').returns(Promise.resolve());
-      sandbox.stub(fs, 'openAsync').returns(Promise.resolve(8000));
+      sandbox.stub(filelock, 'lockAsync').returns(Promise.resolve());
+      sandbox.stub(filelock, 'unlockAsync').returns(Promise.resolve());
     });
 
     afterEach(() => {
@@ -576,8 +576,8 @@ describe('File', () => {
       return file.withLock(fn)
         .then(() => {
           sinon.assert.callOrder(
-            fsExt.flockAsync.withArgs(8000, 'ex'),
-            fsExt.flockAsync.withArgs(8000, 'un'));
+            filelock.lockAsync.withArgs(file.getName()),
+            filelock.unlockAsync.withArgs(file.getName()));
         });
     });
   });

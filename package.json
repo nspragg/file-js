@@ -79,7 +79,7 @@
   },
   "dependencies": {
     "bluebird": "^3.4.7",
-    "fs-ext": "^0.5.0",
-    "minimatch": "^3.0.3"
+    "minimatch": "^3.0.3",
+    "proper-lockfile": "^2.0.0"
   }
 }
