@@ -80,6 +80,6 @@
   "dependencies": {
     "bluebird": "^3.4.7",
     "minimatch": "^3.0.3",
-    "proper-lockfile": "^2.0.0"
+    "proper-lockfile": "^1.2.0"
   }
 }
