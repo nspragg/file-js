@@ -45,7 +45,7 @@ npm install --save file-js
 ```js
 const File = require('file-js');
 
-const file = File.create('myFile');
+const file = File.create('myDir');
 file.getList()
   then((files) => {
     files.each(console.log);
