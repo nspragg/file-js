@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Home - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+
+    
+
+
+
+    
+
+
+
+
+
+
+
+
+
+    
+
+
+    <section class="readme">
+        <article><h1>file-js</h1><p><a href="https://travis-ci.org/nspragg/file-js"><img src="https://travis-ci.org/nspragg/file-js.svg" alt="Build Status"></a> <a href="https://coveralls.io/github/nspragg/file-js?branch=master"><img src="https://coveralls.io/repos/github/nspragg/file-js/badge.svg?branch=master" alt="Coverage Status"></a></p>
+<blockquote>
+<p>Abstract representation of a pathname</p>
+</blockquote>
+<h2>Installation</h2><pre class="prettyprint source"><code>npm install --save file-js</code></pre><h2>Common examples</h2><p>The example below list all files</p>
+<pre class="prettyprint source lang-js"><code>const File = require('file-js');
+
+const file = File.create('myDir');
+file.getList()
+  then((files) => {
+    files.each(console.log);
+  });</code></pre><h4>Type checking</h4><pre class="prettyprint source lang-js"><code>const pathname = File.create('myFile');
+if (pathname.isFile()) {
+  console.log(`process ${pathname}`)
+}</code></pre><h4>List files for a directory</h4><p>Synchronously list files:</p>
+<pre class="prettyprint source lang-js"><code>const dir = File.create('myDirectory');
+const files = dir.getListSync()
+
+console.log(files.forEach(console.log));</code></pre><p>Asynchronously list files:</p>
+<pre class="prettyprint source lang-js"><code>const dir = File.create('myDirectory');
+dir.getList().each(console.log);</code></pre><h4>File locking</h4><p>Perform operations on a file whilst locked:</p>
+<pre class="prettyprint source lang-js"><code>const fs = require('fs');
+const file = File.create('myFile');
+
+file.withLock(() => {
+  file.isWritable((w_ok) => {
+    if (w_ok) {
+      fs.writeFileSync(file.getAbsolutePath(), 'my data\n');
+    }
+  });
+});</code></pre><h4>Check permissions</h4><p>Check that a pathname has write permission:</p>
+<pre class="prettyprint source lang-js"><code>const file = File.create('myFile');
+file.isWritable((isWritable) => {
+  if (isWritable) {
+    console.log(`Able to write to ${file.getName()}`);
+  }  
+});</code></pre><p>Check that a pathname is executable:</p>
+<pre class="prettyprint source lang-js"><code>const file = File.create('myFile');
+file.isExecutable((isExecutable) => {
+  if (isExecutable) {
+    console.log(`Able to execute ${file.getName()}`);
+  }
+});</code></pre><h4>Pathname changes and access</h4><p>Get the last time a pathname was modified:</p>
+<pre class="prettyprint source lang-js"><code>const file = File.create('myFile');
+const lastModified = file.lastModifiedSync();
+
+console.log(`${file.getName()} was last modified on ${lastModified}`);</code></pre><p>Get the last time a pathname was accessed:</p>
+<pre class="prettyprint source lang-js"><code>const file = File.create('myFile');
+const lastAccessed = file.lastAccessedSync();
+
+console.log(`${file.getName()} was last accessed on ${lastAccessed}`);</code></pre><h4>File size</h4><p>Check a file is less than 1k:</p>
+<pre class="prettyprint source lang-js"><code>const file = File.create('myFile');
+if (file.sizeSync() &lt; 1024) {
+  console.log(`${file.getName()} &lt; 1k`);
+}</code></pre><h4>Supports callbacks</h4><p>Get list of files for a directory:</p>
+<pre class="prettyprint source lang-js"><code>const dir = File.create('myDir');
+dir.getList((err, files) => {
+  if (err) return console.error(err);
+
+  console.log(files);
+});</code></pre></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 07 2017 20:18:04 GMT+0000 (GMT) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
