@@ -57,7 +57,8 @@ if (file.isDirectorySync()) {
 }
 ```
 
-## Documentation 
+## Documentation
+For more examples and API details, see [API documentation](https://nspragg.github.io/file-js/)
 
 ## Test
 
