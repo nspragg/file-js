@@ -24,7 +24,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#getDepthSync">getDepthSync</a></li><li data-type='method'><a href="File.html#getFiles">getFiles</a></li><li data-type='method'><a href="File.html#getList">getList</a></li><li data-type='method'><a href="File.html#getListSync">getListSync</a></li><li data-type='method'><a href="File.html#getName">getName</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li><li data-type='method'><a href="File.html#isHiddenSync">isHiddenSync</a></li></ul></li></ul>
 </nav>
 
 <div id="main">
@@ -202,7 +202,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line254">line 254</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line372">line 372</a>
     </li></ul></dd>
     
 
@@ -250,14 +250,14 @@ const file = File.create();</code></pre>
 
     
 
-    <h4 class="name" id="isDirectory"><span class="type-signature"></span>isDirectory<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getDepthSync"><span class="type-signature"></span>getDepthSync<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Determine if pathname is a directory</p>
+    <p>Synchronously caculate the depth of a directory</p>
 </div>
 
 
@@ -301,7 +301,516 @@ const file = File.create();</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line98">line 98</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line269">line 269</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>boolean</p>
+</div>
+
+
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>import File from 'file-js';
+
+const file = File.create('myDirectory');
+console.log(file.getDepthSync());</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getFiles"><span class="type-signature"></span>getFiles<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Get list of file objects, if pathname is a directory</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line242">line 242</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>a promise. If the Promise fulfils, the fulfilment value is
+a list of File objects</p>
+</div>
+
+
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>import File from 'file-js';
+
+const file = File.create('./myDirectory');
+file.getFiles()
+.then((files) => {
+   console.log(files.map(file => file.isFileSync()));
+});</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getList"><span class="type-signature"></span>getList<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Get list of file objects, if pathname is a directory</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line214">line 214</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>a promise. If the Promise fulfils, the fulfilment value is
+a list of pathnames</p>
+</div>
+
+
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>import File from 'file-js';
+
+const file = File.create('./myDirectory');
+file.getList()
+.then((files) => {
+   console.log(files);
+});</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getListSync"><span class="type-signature"></span>getListSync<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Synchronously get list of files, if pathname is a directory</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line190">line 190</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>array of files</p>
+</div>
+
+
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>import File from 'file-js';
+
+const file = File.create('./myHiddenFile');
+const files = file.getListSync();
+console.log(files);</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getName"><span class="type-signature"></span>getName<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Returns the pathname as a string</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line290">line 290</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>String</p>
+</div>
+
+
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>import File from 'file-js';
+
+const file = File.create('myDirectory');
+console.log(file.getDepthSync());</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="isDirectory"><span class="type-signature"></span>isDirectory<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Determine if pathname is a file</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line163">line 163</a>
     </li></ul></dd>
     
 
@@ -329,7 +838,7 @@ const file = File.create();</code></pre>
         
 <div class="param-desc">
     <p>If the Promise fulfils, the fulfilment value is
-a boolean indicating if the pathname is a directory</p>
+a boolean indicating if the pathname is a file</p>
 </div>
 
 
@@ -342,8 +851,8 @@ a boolean indicating if the pathname is a directory</p>
     <pre class="prettyprint"><code>import File from 'file-js';
 
 const file = File.create('myDirectory');
-file.isDirectory((isDirectory) => {
-  console.log(isDirectory);
+file.isFile((isFile) => {
+  console.log(isFile);
 });</code></pre>
 
 
@@ -404,7 +913,7 @@ file.isDirectory((isDirectory) => {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line120">line 120</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line119">line 119</a>
     </li></ul></dd>
     
 
@@ -447,6 +956,109 @@ a boolean indicating if the pathname is a file</p>
 const file = File.create('myDirectory');
 file.isFile((isFile) => {
   console.log(isFile);
+});</code></pre>
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="isDirectory"><span class="type-signature"></span>isDirectory<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Determine if pathname is a directory</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line97">line 97</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>If the Promise fulfils, the fulfilment value is
+a boolean indicating if the pathname is a directory</p>
+</div>
+
+
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>import File from 'file-js';
+
+const file = File.create('myDirectory');
+file.isDirectory((isDirectory) => {
+  console.log(isDirectory);
 });</code></pre>
 
 
@@ -507,7 +1119,7 @@ file.isFile((isFile) => {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line58">line 58</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line57">line 57</a>
     </li></ul></dd>
     
 
@@ -609,7 +1221,7 @@ if (file.isDirectorySync()) {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line78">line 78</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line77">line 77</a>
     </li></ul></dd>
     
 
@@ -656,6 +1268,108 @@ if (file.isFileSync()) {
 
 
         
+            
+
+    
+
+    <h4 class="name" id="isHiddenSync"><span class="type-signature"></span>isHiddenSync<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Synchronously determine if pathname is a hidden file</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line140">line 140</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>boolean</p>
+</div>
+
+
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>import File from 'file-js';
+
+const file = File.create('./myHiddenFile');
+if (file.isHiddenSync()) {
+   console.log('processing hidden file');
+}</code></pre>
+
+
+
+        
     
 
     
@@ -673,7 +1387,7 @@ if (file.isFileSync()) {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 07 2017 20:18:04 GMT+0000 (GMT) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 19:20:44 GMT+0000 (GMT) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>

@@ -299,7 +299,7 @@ class File {
    * import File from 'file-js';
    *
    * const file = File.create('myDirectory');
-   * console.log(file.getDepthSync());
+   * console.log(file.getName());
    */
   getName() {
     return this._pathname;

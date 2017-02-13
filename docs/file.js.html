@@ -24,7 +24,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#getDepthSync">getDepthSync</a></li><li data-type='method'><a href="File.html#getFiles">getFiles</a></li><li data-type='method'><a href="File.html#getList">getList</a></li><li data-type='method'><a href="File.html#getListSync">getListSync</a></li><li data-type='method'><a href="File.html#getName">getName</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li><li data-type='method'><a href="File.html#isHiddenSync">isHiddenSync</a></li></ul></li></ul>
 </nav>
 
 <div id="main">
@@ -58,7 +58,6 @@ function joinWith(dir) {
  * @class
  */
 class File {
-
   constructor(pathname) {
     this._dir = process.cwd();
     this._pathname = pathname;
@@ -174,12 +173,27 @@ class File {
    * file.isFile((isFile) => {
    *   console.log(isFile);
    * });
-   *
    */
   isFile() {
     return this._checkAsyncStats('isFile');
   }
 
+  /**
+   * Synchronously determine if pathname is a hidden file
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * isHiddenSync
+   * @return boolean
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('./myHiddenFile');
+   * if (file.isHiddenSync()) {
+   *    console.log('processing hidden file');
+   * }
+   */
   isHiddenSync() {
     if (!this.isDirectorySync()) {
       return this._isHiddenFile();
@@ -187,6 +201,23 @@ class File {
     return this._isHiddenDirectory();
   }
 
+  /**
+   * Determine if pathname is a file
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * isDirectory
+   * @return If the Promise fulfils, the fulfilment value is
+   * a boolean indicating if the pathname is a file
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('myDirectory');
+   * file.isFile((isFile) => {
+   *   console.log(isFile);
+   * });
+   */
   isHidden() {
     this.isDirectory()
       .then((isDirectory) => {
@@ -197,6 +228,21 @@ class File {
       });
   }
 
+  /**
+   * Synchronously get list of files, if pathname is a directory
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getListSync
+   * @return array of files
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('./myHiddenFile');
+   * const files = file.getListSync();
+   * console.log(files);
+   */
   getListSync() {
     if (this.isDirectorySync()) {
       return fs.readdirSync(this._pathname).map((file) => {
@@ -206,6 +252,24 @@ class File {
     return null;
   }
 
+  /**
+   * Get list of file objects, if pathname is a directory
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getList
+   * @return a promise. If the Promise fulfils, the fulfilment value is
+   * a list of pathnames
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('./myDirectory');
+   * file.getList()
+   * .then((files) => {
+   *    console.log(files);
+   * });
+   */
   getList() {
     return this.isDirectory()
       .then((isDirectory) => {
@@ -216,6 +280,47 @@ class File {
       });
   }
 
+  /**
+   * Get list of file objects, if pathname is a directory
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getFiles
+   * @return a promise. If the Promise fulfils, the fulfilment value is
+   * a list of File objects
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('./myDirectory');
+   * file.getFiles()
+   * .then((files) => {
+   *    console.log(files.map(file => file.isFileSync()));
+   * });
+   */
+  getFiles() {
+    return this.getList()
+      .then((list) => {
+        if (!list) return Promise.resolve(null);
+
+        return list.map((pathname) => File.create(pathname));
+      });
+  }
+
+  /**
+   * Synchronously caculate the depth of a directory
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getDepthSync
+   * @return boolean
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('myDirectory');
+   * console.log(file.getDepthSync());
+   */
   getDepthSync() {
     if (!this.isDirectorySync()) {
       return this._depth(path.dirname(this._pathname));
@@ -223,6 +328,20 @@ class File {
     return this._depth(this._pathname);
   }
 
+  /**
+   * Returns the pathname as a string
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getName
+   * @return String
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('myDirectory');
+   * console.log(file.getDepthSync());
+   */
   getName() {
     return this._pathname;
   }
@@ -290,24 +409,26 @@ class File {
         filelock.unlockAsync(this._pathname);
       });
   }
+
+  /**
+   * Static factory method to create an instance of File
+   *
+   * @static
+   * @memberOf File
+   * @method
+   * create
+   * @return File instance
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create();
+   */
+  static create(filename) {
+    return new File(filename);
+  }
 }
 
-/**
- * Static factory method to create an instance of File
- *
- * @static
- * @memberOf File
- * @method
- * create
- * @return File instance
- * @example
- * import File from 'file-js';
- *
- * const file = File.create();
- */
-module.exports.create = (filename) => {
-  return new File(filename);
-};
+module.exports.create = File.create;
 </code></pre>
         </article>
     </section>
@@ -320,7 +441,7 @@ module.exports.create = (filename) => {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Feb 07 2017 20:18:04 GMT+0000 (GMT) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 19:20:44 GMT+0000 (GMT) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>
