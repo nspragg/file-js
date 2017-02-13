@@ -129,6 +129,31 @@ describe('File', () => {
     });
   });
 
+  describe('.getFiles', () => {
+    it('returns a list of files objects for a given directory', () => {
+      const file = File.create(getFixturePath('/justFiles'));
+      const files = file.getFiles();
+      const expected = qualifyNames([
+        'justFiles/a.json',
+        'justFiles/b.json',
+        'justFiles/dummy.txt'
+      ]).map((pathname) => File.create(pathname));
+
+      return files
+        .then((list) => {
+          return assert.deepEqual(list, expected);
+        });
+    });
+
+    it('returns null when pathname is not a directory', () => {
+      const file = File.create(getFixturePath('/justFiles/a.json'));
+      const files = file.getFiles();
+      files.then((list) => {
+        assert.strictEqual(list, null);
+      });
+    });
+  });
+
   describe('.getList', () => {
     it('returns a list of files for a given directory', () => {
       const file = File.create(getFixturePath('/justFiles'));

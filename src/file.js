@@ -211,6 +211,24 @@ class File {
     return null;
   }
 
+  /**
+   * Get list of file objects, if pathname is a directory
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getList
+   * @return a promise. If the Promise fulfils, the fulfilment value is
+   * a list of pathnames
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('./myDirectory');
+   * file.getList()
+   * .then((files) => {
+   *    console.log(files);
+   * });
+   */
   getList() {
     return this.isDirectory()
       .then((isDirectory) => {
@@ -218,6 +236,33 @@ class File {
           return fsp.readdirAsync(this._pathname).map(joinWith(this._pathname));
         }
         return null;
+      });
+  }
+
+  /**
+   * Get list of file objects, if pathname is a directory
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getFiles
+   * @return a promise. If the Promise fulfils, the fulfilment value is
+   * a list of File objects
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('./myDirectory');
+   * file.getFiles()
+   * .then((files) => {
+   *    console.log(files.map(file => file.isFileSync()));
+   * });
+   */
+  getFiles() {
+    return this.getList()
+      .then((list) => {
+        if (!list) return Promise.resolve(null);
+
+        return list.map((pathname) => File.create(pathname));
       });
   }
 
@@ -323,21 +368,23 @@ class File {
         filelock.unlockAsync(this._pathname);
       });
   }
+
+  /**
+   * Static factory method to create an instance of File
+   *
+   * @static
+   * @memberOf File
+   * @method
+   * create
+   * @return File instance
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create();
+   */
+  static create(filename) {
+    return new File(filename);
+  }
 }
 
-/**
- * Static factory method to create an instance of File
- *
- * @static
- * @memberOf File
- * @method
- * create
- * @return File instance
- * @example
- * import File from 'file-js';
- *
- * const file = File.create();
- */
-module.exports.create = (filename) => {
-  return new File(filename);
-};
+module.exports.create = File.create;
