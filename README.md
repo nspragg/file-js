@@ -19,6 +19,10 @@
 npm install --save file-js
 ```
 
+## Demo
+
+<img src="https://cloud.githubusercontent.com/assets/5588391/23019443/50b62ff8-f43a-11e6-9f1a-1fc7ce079fcc.gif" width="600">
+
 ## Features
 
 * File glob matching
