@@ -44,7 +44,9 @@ function deleteFile(fname) {
 function deleteFileIfExists(fname) {
   try {
     deleteFile(fname);
-  } catch (e) {}
+  } catch (e) {
+    /*eslint no-empty: "error"*/
+  }
 }
 
 describe('File', () => {
@@ -91,10 +93,12 @@ describe('File', () => {
 
     afterEach(() => {
       fs.readdir(getFixturePath('rename'), (err, files) => {
-        files.forEach(file => {
-          deleteFileIfExists(getFixturePath(`/rename/${file}`));
+        files.forEach((file) => {
+          if (!file.startsWith('.keep')) {
+            deleteFileIfExists(getFixturePath(`/rename/${file}`));
+          }
         });
-      })
+      });
     });
 
     it('renames the file from another file instance', () => {
