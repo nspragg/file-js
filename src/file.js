@@ -201,10 +201,10 @@ class File {
    *
    * const original = File.create('fileA');
    * const renameTo = File.create('fileB');
-   * file
+   * original
    *  .rename(renameTo)
    *  .then(() => {
-   *     console.log(file.getName()) // prints fileA
+   *     console.log(original.getName()) // prints fileA
    *  });
    */
   rename(pathname) {

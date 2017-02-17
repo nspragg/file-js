@@ -24,7 +24,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#getDepthSync">getDepthSync</a></li><li data-type='method'><a href="File.html#getFiles">getFiles</a></li><li data-type='method'><a href="File.html#getList">getList</a></li><li data-type='method'><a href="File.html#getListSync">getListSync</a></li><li data-type='method'><a href="File.html#getName">getName</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li><li data-type='method'><a href="File.html#isHiddenSync">isHiddenSync</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#getDepthSync">getDepthSync</a></li><li data-type='method'><a href="File.html#getFiles">getFiles</a></li><li data-type='method'><a href="File.html#getList">getList</a></li><li data-type='method'><a href="File.html#getListSync">getListSync</a></li><li data-type='method'><a href="File.html#getName">getName</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li><li data-type='method'><a href="File.html#isHiddenSync">isHiddenSync</a></li><li data-type='method'><a href="File.html#rename">rename</a></li></ul></li></ul>
 </nav>
 
 <div id="main">
@@ -202,7 +202,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line372">line 372</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line402">line 402</a>
     </li></ul></dd>
     
 
@@ -301,7 +301,7 @@ const file = File.create();</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line269">line 269</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line299">line 299</a>
     </li></ul></dd>
     
 
@@ -401,7 +401,7 @@ console.log(file.getDepthSync());</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line242">line 242</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line272">line 272</a>
     </li></ul></dd>
     
 
@@ -505,7 +505,7 @@ file.getFiles()
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line214">line 214</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line244">line 244</a>
     </li></ul></dd>
     
 
@@ -609,7 +609,7 @@ file.getList()
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line190">line 190</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line220">line 220</a>
     </li></ul></dd>
     
 
@@ -710,7 +710,7 @@ console.log(files);</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line290">line 290</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line320">line 320</a>
     </li></ul></dd>
     
 
@@ -810,7 +810,7 @@ console.log(file.getName());</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line163">line 163</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line119">line 119</a>
     </li></ul></dd>
     
 
@@ -913,7 +913,7 @@ file.isFile((isFile) => {
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="file.js.html">file.js</a>, <a href="file.js.html#line119">line 119</a>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line163">line 163</a>
     </li></ul></dd>
     
 
@@ -1370,6 +1370,163 @@ if (file.isHiddenSync()) {
 
 
         
+            
+
+    
+
+    <h4 class="name" id="rename"><span class="type-signature"></span>rename<span class="signature">(pathname)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Renames the abstract pathname</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pathname</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type"><a href="File.html">File</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>pathname either as a string or File instance</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="file.js.html">file.js</a>, <a href="file.js.html#line190">line 190</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>If the Promise fulfils, the fulfilment value is undefined</p>
+</div>
+
+
+
+    
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>import File from 'file-js';
+
+const original = File.create('fileA');
+const renameTo = File.create('fileB');
+original
+ .rename(renameTo)
+ .then(() => {
+    console.log(original.getName()) // prints fileA
+ });</code></pre>
+
+
+
+        
     
 
     
@@ -1387,7 +1544,7 @@ if (file.isHiddenSync()) {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 19:45:30 GMT+0000 (GMT) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Feb 17 2017 13:23:57 GMT+0000 (GMT) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>
