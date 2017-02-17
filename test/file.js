@@ -43,7 +43,6 @@ function deleteFile(fname) {
 
 function deleteFileIfExists(fname) {
   try {
-    fs.unlinkSync(fname);
     deleteFile(fname);
   } catch (e) {}
 }
@@ -78,6 +77,67 @@ describe('File', () => {
         });
     });
   });
+
+  describe('.rename', () => {
+    const file = getFixturePath('/rename/a.json');
+    const newname = getFixturePath('/rename/b.json');
+
+    beforeEach(() => {
+      createFile(file, {
+        duration: 10,
+        modifier: 'days'
+      });
+    });
+
+    afterEach(() => {
+      fs.readdir(getFixturePath('rename'), (err, files) => {
+        files.forEach(file => {
+          deleteFileIfExists(getFixturePath(`/rename/${file}`));
+        });
+      })
+    });
+
+    it('renames the file from another file instance', () => {
+      const oldname = getFixturePath('/rename/a.json');
+      const original = File.create(oldname);
+      const renameTo = File.create(newname);
+
+      return original
+        .rename(renameTo)
+        .then(() => {
+          assert.strictEqual(fs.existsSync(oldname), false);
+          assert.strictEqual(fs.existsSync(newname), true);
+          assert.equal(original.getName(), newname);
+          return;
+        });
+    });
+
+    it('renames the file from a string', () => {
+      const oldname = getFixturePath('/rename/a.json');
+      const original = File.create(oldname);
+
+      return original
+        .rename(newname)
+        .then(() => {
+          assert.strictEqual(fs.existsSync(oldname), false);
+          assert.strictEqual(fs.existsSync(newname), true);
+          assert.equal(original.getName(), newname);
+          return;
+        });
+    });
+
+    it('returns an error when the file cannot be renamed', () => {
+      // invalid file
+      const file = File.create(getFixturePath('/rename/z.json'));
+
+      return file
+        .rename('whatevs')
+        .catch((e) => {
+          assert.ok(e);
+        });
+    });
+  });
+
 
   describe('.isFileSync', () => {
     it('returns true when a pathname is a file', () => {

@@ -188,6 +188,36 @@ class File {
   }
 
   /**
+   *  Renames the abstract pathname
+   *
+   * @instance
+   * @memberOf File
+   * @param {string|File} pathname - pathname either as a string or File instance
+   * @method
+   * rename
+   * @return If the Promise fulfils, the fulfilment value is undefined
+   * @example
+   * import File from 'file-js';
+   *
+   * const original = File.create('fileA');
+   * const renameTo = File.create('fileB');
+   * file
+   *  .rename(renameTo)
+   *  .then(() => {
+   *     console.log(file.getName()) // prints fileA
+   *  });
+   */
+  rename(pathname) {
+    const newname = pathname instanceof File ? pathname.getName() : pathname;
+
+    return fsp
+      .renameAsync(this._pathname, newname)
+      .then(() => {
+        this._pathname = newname;
+      });
+  }
+
+  /**
    * Synchronously get list of files, if pathname is a directory
    *
    * @instance
