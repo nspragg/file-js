@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import assert from 'assert';
 import path from 'path';
 import File from '../lib/file';
@@ -94,7 +95,7 @@ describe('File', () => {
     afterEach(() => {
       fs.readdir(getFixturePath('rename'), (err, files) => {
         files.forEach((file) => {
-          if (!file.startsWith('.keep')) {
+          if (!_.startsWith(file, '.keep')) {
             deleteFileIfExists(getFixturePath(`/rename/${file}`));
           }
         });
