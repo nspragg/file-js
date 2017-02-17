@@ -40,7 +40,6 @@ npm install --save file-js
 * Assert existence of files via `.exists()`
 * Watch file
 * Change permissions
-* Rename
 * Support file URI
 * Support for callbacks
 
