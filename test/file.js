@@ -210,6 +210,20 @@ describe('File', () => {
         });
     });
 
+    it('returns a list of files using a file glob', () => {
+      const file = File.create(getFixturePath('/justFiles'));
+      const files = file.getFiles('*.json');
+      const expected = qualifyNames([
+        'justFiles/a.json',
+        'justFiles/b.json'
+      ]).map((pathname) => File.create(pathname));
+
+      return files
+        .then((list) => {
+          return assert.deepEqual(list, expected);
+        });
+    });
+
     it('returns null when pathname is not a directory', () => {
       const file = File.create(getFixturePath('/justFiles/a.json'));
       const files = file.getFiles();

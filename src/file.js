@@ -248,24 +248,25 @@ class File {
    * @memberOf File
    * @method
    * getList
+   * @param {string=} glob - file glob
    * @return a promise. If the Promise fulfils, the fulfilment value is
    * a list of pathnames
    * @example
    * import File from 'file-js';
    *
+   * // get all json files
    * const file = File.create('./myDirectory');
-   * file.getList()
-   * .then((files) => {
-   *    console.log(files);
+   * file.getFiles('*.json')
+   * .then((jsonFiles) => {
+   *    console.log(jsonFiles);
    * });
    */
-  getList() {
-    return this.isDirectory()
-      .then((isDirectory) => {
-        if (isDirectory) {
-          return fsp.readdirAsync(this._pathname).map(joinWith(this._pathname));
-        }
-        return null;
+  getList(glob) {
+    return this.getFiles(glob)
+      .then((list) => {
+        if (!list) return [];
+
+        return list.map((pathname) => pathname.getName());
       });
   }
 
@@ -274,6 +275,7 @@ class File {
    *
    * @instance
    * @memberOf File
+   * @param {string=} glob - file glob
    * @method
    * getFiles
    * @return a promise. If the Promise fulfils, the fulfilment value is
@@ -281,19 +283,28 @@ class File {
    * @example
    * import File from 'file-js';
    *
+   * // get last modified time of all json files
    * const file = File.create('./myDirectory');
-   * file.getFiles()
-   * .then((files) => {
-   *    console.log(files.map(file => file.isFileSync()));
+   * file.getFiles('*.json')
+   * .then((jsonFiles) => {
+   *    console.log(jsonFiles.map(file => file.lastModifiedSync()));
    * });
    */
-  getFiles() {
-    return this.getList()
+  getFiles(glob) {
+    if (!this.isDirectory()) return Promise.resolve(null);
+
+    const results = fsp
+      .readdirAsync(this._pathname)
+      .map(joinWith(this._pathname))
       .then((list) => {
         if (!list) return Promise.resolve(null);
 
         return list.map((pathname) => File.create(pathname));
       });
+
+    if (glob) return results.filter((file) => file.isMatch(glob));
+
+    return results;
   }
 
   /**
@@ -335,6 +346,20 @@ class File {
     return this._pathname;
   }
 
+  /**
+   * Returns the pathname as a string
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getName
+   * @return String
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('myDirectory');
+   * console.log(file.getName());
+   */
   getAbsolutePath() {
     if (path.isAbsolute(this._pathname)) {
       return this._pathname;
