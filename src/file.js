@@ -347,18 +347,18 @@ class File {
   }
 
   /**
-   * Returns the pathname as a string
+   * Returns the absolutePath
    *
    * @instance
    * @memberOf File
    * @method
-   * getName
+   * getAbsolutePath
    * @return String
    * @example
    * import File from 'file-js';
    *
-   * const file = File.create('myDirectory');
-   * console.log(file.getName());
+   * const file = File.create('myFile');
+   * console.log(file.getAbsolutePath());
    */
   getAbsolutePath() {
     if (path.isAbsolute(this._pathname)) {
@@ -367,10 +367,38 @@ class File {
     return [this._dir, this._pathname].join(path.sep);
   }
 
+  /**
+   * Returns the canonical path
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getCanonicalPath
+   * @return String
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('myFile');
+   * console.log(file.getCanonicalPath());
+   */
   getCanonicalPath() {
     return path.normalize(this.getAbsolutePath());
   }
 
+  /**
+   * Returns the file extension.
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getPathExtension
+   * @return String
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('./tmp.sh');
+   * console.log(file.getPathExtension()); // sh
+   */
   getPathExtension() {
     return path.extname(this._pathname).substring(1);
   }
