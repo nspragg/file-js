@@ -3,10 +3,7 @@ import path from 'path';
 import fileGlob from 'minimatch';
 
 import fsp from './fs';
-import fs from 'fs';
 import filelock from './lock';
-
-// const fsp = Promise.promisifyAll(fs);
 
 function joinWith(dir) {
   return (file) => {
@@ -277,7 +274,7 @@ class File {
    */
   getListSync() {
     if (this.isDirectorySync()) {
-      return fs.readdirSync(this._pathname).map((file) => {
+      return fsp.readdirSync(this._pathname).map((file) => {
         return path.join(this._pathname, file);
       });
     }
@@ -470,15 +467,15 @@ class File {
   }
 
   isWritable() {
-    return this._access(fs.W_OK);
+    return this._access(fsp.W_OK);
   }
 
   isReadable() {
-    return this._access(fs.R_OK);
+    return this._access(fsp.R_OK);
   }
 
   isExecutable() {
-    return this._access(fs.X_OK);
+    return this._access(fsp.X_OK);
   }
 
   delete() {

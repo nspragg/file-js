@@ -5,7 +5,6 @@ import File from '../lib/file';
 import moment from 'moment';
 import sinon from 'sinon';
 import Promise from 'bluebird';
-// import fsp from '../lib/fs';
 import fsp from '../lib/fsp';
 import filelock from '../lib/lock';
 
