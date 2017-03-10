@@ -2,7 +2,7 @@ import Promise from 'bluebird';
 import path from 'path';
 import fileGlob from 'minimatch';
 
-import fsp from './fs';
+import fsp from './fsp';
 import filelock from './lock';
 
 function joinWith(dir) {
