@@ -24,7 +24,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#getAbsolutePath">getAbsolutePath</a></li><li data-type='method'><a href="File.html#getCanonicalPath">getCanonicalPath</a></li><li data-type='method'><a href="File.html#getDepthSync">getDepthSync</a></li><li data-type='method'><a href="File.html#getFiles">getFiles</a></li><li data-type='method'><a href="File.html#getList">getList</a></li><li data-type='method'><a href="File.html#getListSync">getListSync</a></li><li data-type='method'><a href="File.html#getName">getName</a></li><li data-type='method'><a href="File.html#getPathExtension">getPathExtension</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li><li data-type='method'><a href="File.html#isHiddenSync">isHiddenSync</a></li><li data-type='method'><a href="File.html#isSocket">isSocket</a></li><li data-type='method'><a href="File.html#issocketSync">issocketSync</a></li><li data-type='method'><a href="File.html#rename">rename</a></li><li data-type='method'><a href="File.html#withLock">withLock</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#getAbsolutePath">getAbsolutePath</a></li><li data-type='method'><a href="File.html#getCanonicalPath">getCanonicalPath</a></li><li data-type='method'><a href="File.html#getDepthSync">getDepthSync</a></li><li data-type='method'><a href="File.html#getFiles">getFiles</a></li><li data-type='method'><a href="File.html#getFileSync">getFileSync</a></li><li data-type='method'><a href="File.html#getList">getList</a></li><li data-type='method'><a href="File.html#getListSync">getListSync</a></li><li data-type='method'><a href="File.html#getName">getName</a></li><li data-type='method'><a href="File.html#getPathExtension">getPathExtension</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li><li data-type='method'><a href="File.html#isHiddenSync">isHiddenSync</a></li><li data-type='method'><a href="File.html#isSocket">isSocket</a></li><li data-type='method'><a href="File.html#issocketSync">issocketSync</a></li><li data-type='method'><a href="File.html#rename">rename</a></li><li data-type='method'><a href="File.html#withLock">withLock</a></li></ul></li></ul>
 </nav>
 
 <div id="main">
@@ -43,11 +43,8 @@
 import path from 'path';
 import fileGlob from 'minimatch';
 
-import fsp from './fs';
-import fs from 'fs';
+import fsp from './fsp';
 import filelock from './lock';
-
-// const fsp = Promise.promisifyAll(fs);
 
 function joinWith(dir) {
   return (file) => {
@@ -318,7 +315,7 @@ class File {
    */
   getListSync() {
     if (this.isDirectorySync()) {
-      return fs.readdirSync(this._pathname).map((file) => {
+      return fsp.readdirSync(this._pathname).map((file) => {
         return path.join(this._pathname, file);
       });
     }
@@ -389,6 +386,35 @@ class File {
     if (glob) return results.filter((file) => file.isMatch(glob));
 
     return results;
+  }
+
+  /**
+   * Synchronously get list of file objects, if pathname is a directory
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getFileSync
+   * @return array of files
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('./myHiddenFile');
+   * const files = file.getFileSync();
+   * console.log(files);
+   */
+  getFilesSync(glob) {
+    if (this.isDirectorySync()) {
+      const files = this.getListSync()
+        .map((pathname) => {
+          return File.create(pathname);
+        });
+
+      if (glob) return files.filter((file) => file.isMatch(glob));
+
+      return files;
+    }
+    return null;
   }
 
   /**
@@ -511,15 +537,15 @@ class File {
   }
 
   isWritable() {
-    return this._access(fs.W_OK);
+    return this._access(fsp.W_OK);
   }
 
   isReadable() {
-    return this._access(fs.R_OK);
+    return this._access(fsp.R_OK);
   }
 
   isExecutable() {
-    return this._access(fs.X_OK);
+    return this._access(fsp.X_OK);
   }
 
   delete() {
@@ -584,7 +610,7 @@ module.exports.create = File.create;</code></pre>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Mar 10 2017 12:51:16 GMT+0000 (GMT) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Mar 10 2017 16:37:02 GMT+0000 (GMT) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>
