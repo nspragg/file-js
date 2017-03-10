@@ -24,7 +24,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#getDepthSync">getDepthSync</a></li><li data-type='method'><a href="File.html#getFiles">getFiles</a></li><li data-type='method'><a href="File.html#getList">getList</a></li><li data-type='method'><a href="File.html#getListSync">getListSync</a></li><li data-type='method'><a href="File.html#getName">getName</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li><li data-type='method'><a href="File.html#isHiddenSync">isHiddenSync</a></li><li data-type='method'><a href="File.html#rename">rename</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#getAbsolutePath">getAbsolutePath</a></li><li data-type='method'><a href="File.html#getCanonicalPath">getCanonicalPath</a></li><li data-type='method'><a href="File.html#getDepthSync">getDepthSync</a></li><li data-type='method'><a href="File.html#getFiles">getFiles</a></li><li data-type='method'><a href="File.html#getList">getList</a></li><li data-type='method'><a href="File.html#getListSync">getListSync</a></li><li data-type='method'><a href="File.html#getName">getName</a></li><li data-type='method'><a href="File.html#getPathExtension">getPathExtension</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li><li data-type='method'><a href="File.html#isHiddenSync">isHiddenSync</a></li><li data-type='method'><a href="File.html#isSocket">isSocket</a></li><li data-type='method'><a href="File.html#issocketSync">issocketSync</a></li><li data-type='method'><a href="File.html#rename">rename</a></li><li data-type='method'><a href="File.html#withLock">withLock</a></li></ul></li></ul>
 </nav>
 
 <div id="main">
@@ -43,10 +43,11 @@
 import path from 'path';
 import fileGlob from 'minimatch';
 
-import fs from './fs';
+import fsp from './fs';
+import fs from 'fs';
 import filelock from './lock';
 
-const fsp = Promise.promisifyAll(fs);
+// const fsp = Promise.promisifyAll(fs);
 
 function joinWith(dir) {
   return (file) => {
@@ -64,7 +65,7 @@ class File {
   }
 
   _getStatsSync() {
-    return fs.statSync(this._pathname);
+    return fsp.statSync(this._pathname);
   }
 
   _getStats() {
@@ -116,6 +117,26 @@ class File {
   }
 
   /**
+   * Synchronously determine if pathname is a socket
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * issocketSync
+   * @return boolean
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('mysocket');
+   * if (file.issocketSync()) {
+   *    console.log('processing socket');
+   * }
+   */
+  isSocketSync() {
+    return this._getStatsSync().isSocket();
+  }
+
+  /**
    * Synchronously determine if pathname is a file
    *
    * @instance
@@ -155,6 +176,28 @@ class File {
    */
   isDirectory() {
     return this._checkAsyncStats('isDirectory');
+  }
+
+  /**
+   * Determine if pathname is a Socket
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * isSocket
+   * @return If the Promise fulfils, the fulfilment value is
+   * a boolean indicating if the pathname is a Socket
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('mySocket');
+   * file.isSocket((isSocket) => {
+   *   console.log(isSocket);
+   * });
+   *
+   */
+  isSocket() {
+    return this._checkAsyncStats('isSocket');
   }
 
   /**
@@ -328,7 +371,7 @@ class File {
    * const file = File.create('./myDirectory');
    * file.getFiles('*.json')
    * .then((jsonFiles) => {
-   *    console.log(files.map(file => file.lastModifiedSync()));
+   *    console.log(jsonFiles.map(file => file.lastModifiedSync()));
    * });
    */
   getFiles(glob) {
@@ -387,6 +430,20 @@ class File {
     return this._pathname;
   }
 
+  /**
+   * Returns the absolutePath
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getAbsolutePath
+   * @return String
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('myFile');
+   * console.log(file.getAbsolutePath());
+   */
   getAbsolutePath() {
     if (path.isAbsolute(this._pathname)) {
       return this._pathname;
@@ -394,10 +451,38 @@ class File {
     return [this._dir, this._pathname].join(path.sep);
   }
 
+  /**
+   * Returns the canonical path
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getCanonicalPath
+   * @return String
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('myFile');
+   * console.log(file.getCanonicalPath());
+   */
   getCanonicalPath() {
     return path.normalize(this.getAbsolutePath());
   }
 
+  /**
+   * Returns the file extension.
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getPathExtension
+   * @return String
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('./tmp.sh');
+   * console.log(file.getPathExtension()); // sh
+   */
   getPathExtension() {
     return path.extname(this._pathname).substring(1);
   }
@@ -441,6 +526,24 @@ class File {
     return fsp.unlinkAsync(this._pathname);
   }
 
+  /**
+   * Locks the pathname
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * withLock
+   * @return returning value of function
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('myFile');
+   * file.with(() => {
+   *   if (file.isFileSync()) {
+   *     file.delete();
+   *   } 
+   * });
+   */
   withLock(fn) {
     return filelock.lockAsync(this._pathname)
       .then(() => {
@@ -469,8 +572,7 @@ class File {
   }
 }
 
-module.exports.create = File.create;
-</code></pre>
+module.exports.create = File.create;</code></pre>
         </article>
     </section>
 
@@ -482,7 +584,7 @@ module.exports.create = File.create;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat Feb 25 2017 11:23:08 GMT+0000 (GMT) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Mar 10 2017 12:51:16 GMT+0000 (GMT) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>

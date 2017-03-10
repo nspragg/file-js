@@ -2,10 +2,11 @@ import Promise from 'bluebird';
 import path from 'path';
 import fileGlob from 'minimatch';
 
-import fs from './fs';
+import fsp from './fs';
+import fs from 'fs';
 import filelock from './lock';
 
-const fsp = Promise.promisifyAll(fs);
+// const fsp = Promise.promisifyAll(fs);
 
 function joinWith(dir) {
   return (file) => {
@@ -23,7 +24,7 @@ class File {
   }
 
   _getStatsSync() {
-    return fs.statSync(this._pathname);
+    return fsp.statSync(this._pathname);
   }
 
   _getStats() {

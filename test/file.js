@@ -5,7 +5,8 @@ import File from '../lib/file';
 import moment from 'moment';
 import sinon from 'sinon';
 import Promise from 'bluebird';
-import fs from '../lib/fs';
+// import fsp from '../lib/fs';
+import fsp from '../lib/fsp';
 import filelock from '../lib/lock';
 
 const sandbox = sinon.sandbox.create();
@@ -32,13 +33,13 @@ function formatDate(date) {
 
 function createFile(fname, opts) {
   const time = new Date(moment().subtract(opts.duration, opts.modifier));
-  const fd = fs.openSync(fname, 'w+');
-  fs.futimesSync(fd, time, time);
-  fs.closeSync(fd);
+  const fd = fsp.openSync(fname, 'w+');
+  fsp.futimesSync(fd, time, time);
+  fsp.closeSync(fd);
 }
 
 function deleteFile(fname) {
-  return fs.unlinkSync(fname);
+  return fsp.unlinkSync(fname);
 }
 
 function deleteFileIfExists(fname) {
@@ -50,6 +51,10 @@ function deleteFileIfExists(fname) {
 }
 
 describe('File', () => {
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   describe('.isDirectorySync', () => {
     it('returns true when a pathname is a directory', () => {
       const file = File.create(getFixturePath('/justFiles'));
@@ -82,19 +87,33 @@ describe('File', () => {
 
   describe('.isSocketSync', () => {
     it('returns true when a pathname is a socket', () => {
-      const file = File.create(getFixturePath('/types/socketfile1'));
+      const statsSync = {
+        isSocket: () => {
+          return true;
+        }
+      };
+      sandbox.stub(fsp, 'statSync').returns(statsSync);
+
+      const file = File.create(getFixturePath('/types/mySocketfile'));
       assert(file.isSocketSync());
     });
 
     it('returns false when a pathname is not a socket', () => {
-      const file = File.create(getFixturePath('/types/file.json'));
+      const file = File.create(getFixturePath('/justFiles/a.json'));
       assert(!file.isSocketSync());
     });
   });
 
   describe('.isSocket', () => {
     it('returns true when a pathname is a Socket', () => {
-      const file = File.create(getFixturePath('/types/socketfile1'));
+      const stats = {
+        isSocket: () => {
+          return true;
+        }
+      };
+      sandbox.stub(fsp, 'statAsync').returns(Promise.resolve(stats));
+
+      const file = File.create(getFixturePath('/types/mySocketfile'));
       return file.isSocket()
         .then((isSocket) => {
           return assert(isSocket);
@@ -102,7 +121,7 @@ describe('File', () => {
     });
 
     it('returns false when a pathname is not a Socket', () => {
-      const file = File.create(getFixturePath('/types/file.json'));
+      const file = File.create(getFixturePath('/justFiles/a.json'));
       return file.isSocket()
         .then((isSocket) => {
           return assert(!isSocket);
@@ -122,7 +141,7 @@ describe('File', () => {
     });
 
     afterEach(() => {
-      fs.readdir(getFixturePath('rename'), (err, files) => {
+      fsp.readdir(getFixturePath('rename'), (err, files) => {
         files.forEach((file) => {
           if (!_.startsWith(file, '.keep')) {
             deleteFileIfExists(getFixturePath(`/rename/${file}`));
@@ -139,8 +158,8 @@ describe('File', () => {
       return original
         .rename(renameTo)
         .then(() => {
-          assert.strictEqual(fs.existsSync(oldname), false);
-          assert.strictEqual(fs.existsSync(newname), true);
+          assert.strictEqual(fsp.existsSync(oldname), false);
+          assert.strictEqual(fsp.existsSync(newname), true);
           assert.equal(original.getName(), newname);
           return;
         });
@@ -153,8 +172,8 @@ describe('File', () => {
       return original
         .rename(newname)
         .then(() => {
-          assert.strictEqual(fs.existsSync(oldname), false);
-          assert.strictEqual(fs.existsSync(newname), true);
+          assert.strictEqual(fsp.existsSync(oldname), false);
+          assert.strictEqual(fsp.existsSync(newname), true);
           assert.equal(original.getName(), newname);
           return;
         });
@@ -380,11 +399,11 @@ describe('File', () => {
 
   describe('.lastModified', () => {
     before(() => {
-      fs.mkdirSync(getFixturePath('dates'));
+      fsp.mkdirSync(getFixturePath('dates'));
     });
 
     after(() => {
-      fs.rmdirSync(getFixturePath('dates'));
+      fsp.rmdirSync(getFixturePath('dates'));
     });
 
     const files = [
@@ -437,11 +456,11 @@ describe('File', () => {
 
   describe('.lastAccessed', () => {
     before(() => {
-      fs.mkdirSync(getFixturePath('dates'));
+      fsp.mkdirSync(getFixturePath('dates'));
     });
 
     after(() => {
-      fs.rmdirSync(getFixturePath('dates'));
+      fsp.rmdirSync(getFixturePath('dates'));
     });
 
     const files = [
@@ -496,9 +515,9 @@ describe('File', () => {
     let statSync;
 
     before(() => {
-      fs.mkdirSync(getFixturePath('dates'));
+      fsp.mkdirSync(getFixturePath('dates'));
 
-      statSync = sandbox.stub(fs, 'statSync');
+      statSync = sandbox.stub(fsp, 'statSync');
       statSync.returns({
         isDirectory: function () {
           return true;
@@ -507,7 +526,7 @@ describe('File', () => {
     });
 
     after(() => {
-      fs.rmdirSync(getFixturePath('dates'));
+      fsp.rmdirSync(getFixturePath('dates'));
       sandbox.restore();
     });
 
@@ -628,11 +647,11 @@ describe('File', () => {
 
   describe('.delete', () => {
     before(() => {
-      fs.mkdirSync(getFixturePath('delete'));
+      fsp.mkdirSync(getFixturePath('delete'));
     });
 
     after(() => {
-      fs.rmdirSync(getFixturePath('delete'));
+      fsp.rmdirSync(getFixturePath('delete'));
     });
 
     const fileToDelete = getFixturePath('delete/a.txt');
@@ -649,7 +668,7 @@ describe('File', () => {
       return file.delete()
         .then(() => {
           assert.throws(() => {
-            fs.statSync(getFixturePath('delete/a.txt'));
+            fsp.statSync(getFixturePath('delete/a.txt'));
           }, /ENOENT/);
         });
     });
