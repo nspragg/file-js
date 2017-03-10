@@ -78,13 +78,13 @@ class File {
    * @instance
    * @memberOf File
    * @method
-   * issocketSync
+   * isSocketSync
    * @return boolean
    * @example
    * import File from 'file-js';
    *
    * const file = File.create('mysocket');
-   * if (file.issocketSync()) {
+   * if (file.isSocketSync()) {
    *    console.log('processing socket');
    * }
    */
