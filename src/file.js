@@ -442,6 +442,24 @@ class File {
     return fsp.unlinkAsync(this._pathname);
   }
 
+  /**
+   * Locks the pathname
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * withLock
+   * @return returning value of function
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('myFile');
+   * file.with(() => {
+   *   if (file.isFileSync()) {
+   *     file.delete();
+   *   } 
+   * });
+   */
   withLock(fn) {
     return filelock.lockAsync(this._pathname)
       .then(() => {
