@@ -348,6 +348,35 @@ class File {
   }
 
   /**
+   * Synchronously get list of file objects, if pathname is a directory
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * getFileSync
+   * @return array of files
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('./myHiddenFile');
+   * const files = file.getFileSync();
+   * console.log(files);
+   */
+  getFilesSync(glob) {
+    if (this.isDirectorySync()) {
+      const files = this.getListSync()
+        .map((pathname) => {
+          return File.create(pathname);
+        });
+
+      if (glob) return files.filter((file) => file.isMatch(glob));
+
+      return files;
+    }
+    return null;
+  }
+
+  /**
    * Synchronously caculate the depth of a directory
    *
    * @instance

@@ -280,6 +280,37 @@ describe('File', () => {
     });
   });
 
+  describe('.getFilesSync', () => {
+    it('returns a list of files objects for a given directory', () => {
+      const file = File.create(getFixturePath('/justFiles'));
+      const files = file.getFilesSync();
+      const expected = qualifyNames([
+        'justFiles/a.json',
+        'justFiles/b.json',
+        'justFiles/dummy.txt'
+      ]).map((pathname) => File.create(pathname));
+
+      assert.deepEqual(files, expected);
+    });
+
+    it('returns a list of files using a file glob', () => {
+      const file = File.create(getFixturePath('/justFiles'));
+      const files = file.getFilesSync('*.json');
+      const expected = qualifyNames([
+        'justFiles/a.json',
+        'justFiles/b.json'
+      ]).map((pathname) => File.create(pathname));
+
+      assert.deepEqual(files, expected);
+    });
+
+    it('returns null when pathname is not a directory', () => {
+      const file = File.create(getFixturePath('/justFiles/a.json'));
+      const files = file.getFilesSync();
+      assert.strictEqual(files, null);
+    });
+  });
+
   describe('.getList', () => {
     it('returns a list of files for a given directory', () => {
       const file = File.create(getFixturePath('/justFiles'));
