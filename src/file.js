@@ -75,6 +75,26 @@ class File {
   }
 
   /**
+   * Synchronously determine if pathname is a socket
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * issocketSync
+   * @return boolean
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('mysocket');
+   * if (file.issocketSync()) {
+   *    console.log('processing socket');
+   * }
+   */
+  isSocketSync() {
+    return this._getStatsSync().isSocket();
+  }
+
+  /**
    * Synchronously determine if pathname is a file
    *
    * @instance
@@ -114,6 +134,28 @@ class File {
    */
   isDirectory() {
     return this._checkAsyncStats('isDirectory');
+  }
+
+  /**
+   * Determine if pathname is a Socket
+   *
+   * @instance
+   * @memberOf File
+   * @method
+   * isSocket
+   * @return If the Promise fulfils, the fulfilment value is
+   * a boolean indicating if the pathname is a Socket
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = File.create('mySocket');
+   * file.isSocket((isSocket) => {
+   *   console.log(isSocket);
+   * });
+   *
+   */
+  isSocket() {
+    return this._checkAsyncStats('isSocket');
   }
 
   /**

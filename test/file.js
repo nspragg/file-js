@@ -5,7 +5,6 @@ import File from '../lib/file';
 import moment from 'moment';
 import sinon from 'sinon';
 import Promise from 'bluebird';
-
 import fs from '../lib/fs';
 import filelock from '../lib/lock';
 
@@ -77,6 +76,36 @@ describe('File', () => {
       return file.isDirectory()
         .then((isDirectory) => {
           return assert(!isDirectory);
+        });
+    });
+  });
+
+  describe('.isSocketSync', () => {
+    it('returns true when a pathname is a socket', () => {
+      const file = File.create(getFixturePath('/types/socketfile1'));
+      assert(file.isSocketSync());
+    });
+
+    it('returns false when a pathname is not a socket', () => {
+      const file = File.create(getFixturePath('/types/file.json'));
+      assert(!file.isSocketSync());
+    });
+  });
+
+  describe('.isSocket', () => {
+    it('returns true when a pathname is a Socket', () => {
+      const file = File.create(getFixturePath('/types/socketfile1'));
+      return file.isSocket()
+        .then((isSocket) => {
+          return assert(isSocket);
+        });
+    });
+
+    it('returns false when a pathname is not a Socket', () => {
+      const file = File.create(getFixturePath('/types/file.json'));
+      return file.isSocket()
+        .then((isSocket) => {
+          return assert(!isSocket);
         });
     });
   });
