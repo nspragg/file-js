@@ -9,6 +9,32 @@ import { TestStats } from './testStats';
 
 const sandbox = sinon.sandbox.create();
 
+const nestedFiles = qualifyNames([
+  '/nested/.hidden1/bad.txt',
+  '/nested/c.json',
+  'nested/d.json',
+  '/nested/mydir/e.json'
+]);
+
+const jsonFiles = qualifyNames([
+  '/nested/c.json',
+  'nested/d.json',
+  '/nested/mydir/e.json'
+]);
+
+const justFiles = qualifyNames([
+  '/justFiles/',
+  '/justFiles/a.json',
+  '/justFiles/b.json',
+  '/justFiles/dummy.txt'
+]);
+
+const justDirectories = qualifyNames([
+  '/nested/',
+  '/nested/.hidden1',
+  '/nested/mydir'
+]);
+
 interface DateOpts {
   duration?: any;
   modifier?: string;
@@ -626,5 +652,36 @@ describe('File', () => {
       const file = new File(getFixturePath('dates/a.txt'));
       assert.equal(file.getName(), getFixturePath('dates/a.txt'));
     });
+  });
+
+  describe('.walkSync', () => {
+    it('returns all files from a given directory', () => {
+      const file = new File(getFixturePath('justFiles/'));
+
+      const files = file.walkSync();
+      assert.deepEqual(files, justFiles);
+    });
+
+    it('returns only returns directories', () => {
+      const file = new File(getFixturePath('nested/'));
+
+      const directories = file.walkSync((f) => {
+        return f.isDirectorySync();
+      });
+      assert.deepEqual(directories, justDirectories);
+    });
+
+    it('filters by ext', () => {
+      const file = new File(getFixturePath('nested/'));
+
+      const directories = file.walkSync((f) => {
+        return path.extname(f.getName()) === '.json';
+      });
+      assert.deepEqual(directories, jsonFiles);
+    });
+  });
+
+  describe('.walk', () => {
+
   });
 });
