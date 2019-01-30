@@ -378,42 +378,172 @@ export class File {
     return path.extname(this.pathname).substring(1);
   }
 
+  /**
+   * Returns the last modified date.
+   *
+   * @memberOf File
+   * @method
+   * lastModifiedSync
+   * @return Date
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./tmp.sh');
+   * console.log(file.lastModifiedSync());
+   */
   public lastModifiedSync(): Date {
     return this.getStatsSync().mtime;
   }
 
+  /**
+   * Returns the last the file was accessed.
+   *
+   * @memberOf File
+   * @method
+   * lastAccessedSync
+   * @return Date
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./tmp.sh');
+   * console.log(file.lastAccessedSync());
+   */
   public lastAccessedSync(): Date {
     return this.getStatsSync().atime;
   }
 
+  /**
+   * Returns the last the file was changed.
+   *
+   * @memberOf File
+   * @method
+   * lastChangedSync
+   * @return Date
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./tmp.sh');
+   * console.log(file.lastChangedSync());
+   */
   public lastChangedSync(): Date {
     return this.getStatsSync().ctime;
   }
 
+  /**
+   * Returns the size of the file.
+   *
+   * @memberOf File
+   * @method
+   * sizeSync
+   * @return Date
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./tmp.sh');
+   * console.log(file.sizeSync());
+   */
   public sizeSync(): number {
     return this.getStatsSync().size;
   }
 
+  /**
+   * Returns true if the file is writable
+   *
+   * @memberOf File
+   * @method
+   * isWritable
+   * @return Boolean
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./tmp.sh');
+   * console.log(file.isWritable());
+   */
   public async isWritable(): Promise<boolean> {
     return this.access(constants.W_OK);
   }
 
+  /**
+   * Returns true if the file is readable
+   *
+   * @memberOf File
+   * @method
+   * isReadable
+   * @return Boolean
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./tmp.sh');
+   * console.log(file.isReadable());
+   */
   public async isReadable(): Promise<boolean> {
     return this.access(constants.R_OK);
   }
 
+  /**
+   * Returns true if the file is executable
+   *
+   * @memberOf File
+   * @method
+   * isExecutable
+   * @return Boolean
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./tmp.sh');
+   * console.log(file.sizeSync());
+   */
   public async isExecutable(): Promise<boolean> {
     return this.access(constants.X_OK);
   }
 
+  /**
+   * Deletes the file.
+   *
+   * @memberOf File
+   * @method
+   * delete
+   * @return void
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./tmp.sh');
+   * file.delete();
+   */
   public async delete(): Promise<void> {
     return fsp.unlink(this.pathname);
   }
 
+  /**
+   * Returns true if the file exists
+   *
+   * @memberOf File
+   * @method
+   * exists
+   * @return Boolean
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./tmp.sh');
+   * console.log(file.exists());
+   */
   public async exists(): Promise<boolean> {
     return this.access(constants.R_OK);
   }
 
+  /**
+   * Returns true if the given file glob matches
+   *
+   * @memberOf File
+   * @method
+   * isMatch
+   * @return Boolean
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./tmp.sh');
+   * console.log(file.isMatch());
+   */
   public isMatch(globPattern: string): boolean {
     const glob = new fileGlob.Minimatch(globPattern, {
       matchBase: true
