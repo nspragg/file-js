@@ -7,16 +7,11 @@ import {
 import * as fileGlob from 'minimatch';
 import * as path from 'path';
 import * as fsp from './fsp';
-import { walkSync as walker } from './walkSync';
 
 function joinWith(dir: string): (s: string) => string {
   return (file) => {
     return path.join(dir, file);
   };
-}
-
-function alwaysMatch(): boolean {
-  return true;
 }
 
 export class File {
@@ -415,30 +410,15 @@ export class File {
     return fsp.unlink(this.pathname);
   }
 
+  public async exists(): Promise<boolean> {
+    return this.access(constants.R_OK);
+  }
+
   public isMatch(globPattern: string): boolean {
     const glob = new fileGlob.Minimatch(globPattern, {
       matchBase: true
     });
     return glob.match(this.pathname);
-  }
-
-  public async walk(dir: string, fn: any, opts: any): Promise<string[]> {
-    return;
-  }
-
-  public walkSync(filter?: any, opts?: any): string[] {
-    const fn = filter || alwaysMatch;
-
-    const files = [];
-    walker(this, (f) => {
-      const isMatch = fn(f);
-      if (isMatch) {
-        files.push(f.getName());
-      }
-      return true;
-    });
-
-    return files;
   }
 
   private getStatsSync(): Stats {

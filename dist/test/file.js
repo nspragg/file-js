@@ -9,20 +9,44 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const path = require("path");
-const file_1 = require("../src/file");
-const moment = require("moment");
-const sinon = require("sinon");
 const fs = require("fs");
+const moment = require("moment");
+const path = require("path");
+const sinon = require("sinon");
+const file_1 = require("../src/file");
+const fsp = require("../src/fsp");
+const testStats_1 = require("./testStats");
 const sandbox = sinon.sandbox.create();
+const nestedFiles = qualifyNames([
+    '/nested/.hidden1/bad.txt',
+    '/nested/c.json',
+    'nested/d.json',
+    '/nested/mydir/e.json'
+]);
+const jsonFiles = qualifyNames([
+    '/nested/c.json',
+    'nested/d.json',
+    '/nested/mydir/e.json'
+]);
+const justFiles = qualifyNames([
+    '/justFiles/',
+    '/justFiles/a.json',
+    '/justFiles/b.json',
+    '/justFiles/dummy.txt'
+]);
+const justDirectories = qualifyNames([
+    '/nested/',
+    '/nested/.hidden1',
+    '/nested/mydir'
+]);
 function getFixturePath(file) {
     return path.join(`${__dirname}/fixtures/`, file);
 }
-function getAbsolutePath() {
-    return `${process.cwd()}/relativePath`;
+function getAbsolutePath(dir) {
+    return `${process.cwd()}/${dir}`;
 }
 function getCanonicalPath(relativePath) {
-    return path.normalize(getAbsolutePath());
+    return path.normalize(getAbsolutePath(relativePath));
 }
 function qualifyNames(names) {
     return names.map(getFixturePath);
@@ -37,7 +61,7 @@ function createFile(fname, opts) {
     fs.closeSync(fd);
 }
 function deleteFile(fname) {
-    return fs.unlinkSync(fname);
+    fs.unlinkSync(fname);
 }
 describe('File', () => {
     afterEach(() => {
@@ -46,7 +70,7 @@ describe('File', () => {
     describe('.isDirectorySync', () => {
         it('returns true when a pathname is a directory', () => {
             const file = new file_1.File(getFixturePath('/justFiles'));
-            chai_1.assert(file.isDirectorySync());
+            chai_1.assert.isTrue(file.isDirectorySync());
         });
         it('returns false when a pathname is not a directory', () => {
             const file = new file_1.File(getFixturePath('/justFiles/a.json'));
@@ -54,28 +78,20 @@ describe('File', () => {
         });
     });
     describe('.isDirectory', () => {
-        it.only('returns true when a pathname is a directory', () => __awaiter(this, void 0, void 0, function* () {
+        it('returns true when a pathname is a directory', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('/justFiles'));
             const isDirectory = yield file.isDirectory();
-            console.log(isDirectory);
             chai_1.assert.isTrue(isDirectory);
         }));
-        it('returns false when a pathname is not a directory', () => {
+        it('returns false when a pathname is not a directory', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('/justFiles/a.json'));
-            return file.isDirectory()
-                .then((isDirectory) => {
-                return chai_1.assert(!isDirectory);
-            });
-        });
+            const isDirectory = yield file.isDirectory();
+            chai_1.assert.isFalse(isDirectory);
+        }));
     });
     describe('.isSocketSync', () => {
         it('returns true when a pathname is a socket', () => {
-            const statsSync = {
-                isSocket: () => {
-                    return true;
-                }
-            };
-            sandbox.stub(fs, 'statSync').returns(statsSync);
+            sandbox.stub(fs, 'statSync').returns(new testStats_1.TestStats());
             const file = new file_1.File(getFixturePath('/types/mySocketfile'));
             chai_1.assert(file.isSocketSync());
         });
@@ -85,26 +101,17 @@ describe('File', () => {
         });
     });
     describe('.isSocket', () => {
-        it('returns true when a pathname is a Socket', () => {
-            const stats = {
-                isSocket: () => {
-                    return true;
-                }
-            };
-            sandbox.stub(fs, 'statAsync').returns(Promise.resolve(stats));
+        it('returns true when a pathname is a Socket', () => __awaiter(this, void 0, void 0, function* () {
+            sandbox.stub(fsp, 'stat').resolves(new testStats_1.TestStats());
             const file = new file_1.File(getFixturePath('/types/mySocketfile'));
-            return file.isSocket()
-                .then((isSocket) => {
-                return chai_1.assert(isSocket);
-            });
-        });
-        it('returns false when a pathname is not a Socket', () => {
+            const isSocket = yield file.isSocket();
+            chai_1.assert.isTrue(isSocket);
+        }));
+        it('returns false when a pathname is not a Socket', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('/justFiles/a.json'));
-            return file.isSocket()
-                .then((isSocket) => {
-                return chai_1.assert.isFalse(isSocket);
-            });
-        });
+            const isSocket = yield file.isSocket();
+            chai_1.assert.isFalse(isSocket);
+        }));
     });
     describe('.isFileSync', () => {
         it('returns true when a pathname is a file', () => {
@@ -117,20 +124,16 @@ describe('File', () => {
         });
     });
     describe('.isFile', () => {
-        it('returns true when a pathname is a file', () => {
+        it('returns true when a pathname is a file', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('/justFiles/a.json'));
-            return file.isFile()
-                .then((isFile) => {
-                return chai_1.assert(isFile);
-            });
-        });
-        it('returns false when a pathname is not a file', () => {
+            const isFile = yield file.isFile();
+            chai_1.assert.isTrue(isFile);
+        }));
+        it('returns false when a pathname is not a file', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('/justFiles'));
-            return file.isFile()
-                .then((isFile) => {
-                return chai_1.assert.isFalse(isFile);
-            });
-        });
+            const isFile = yield file.isFile();
+            chai_1.assert.isFalse(isFile);
+        }));
     });
     describe('.getListSync', () => {
         it('returns a list of files for a given directory', () => {
@@ -150,38 +153,30 @@ describe('File', () => {
         });
     });
     describe('.getFiles', () => {
-        it('returns a list of files objects for a given directory', () => {
+        it('returns a list of files objects for a given directory', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('/justFiles'));
-            const files = file.getFiles();
+            const files = yield file.getFiles();
             const expected = qualifyNames([
                 'justFiles/a.json',
                 'justFiles/b.json',
                 'justFiles/dummy.txt'
             ]).map(pathname => new file_1.File(pathname));
-            return files
-                .then((list) => {
-                return chai_1.assert.deepEqual(list, expected);
-            });
-        });
-        it('returns a list of files using a file glob', () => {
+            chai_1.assert.deepEqual(files, expected);
+        }));
+        it('returns a list of files using a file glob', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('/justFiles'));
-            const files = file.getFiles('*.json');
+            const files = yield file.getFiles('*.json');
             const expected = qualifyNames([
                 'justFiles/a.json',
                 'justFiles/b.json'
             ]).map(pathname => new file_1.File(pathname));
-            return files
-                .then((list) => {
-                return chai_1.assert.deepEqual(list, expected);
-            });
-        });
-        it('returns null when pathname is not a directory', () => {
+            chai_1.assert.deepEqual(files, expected);
+        }));
+        it('returns an empty array when pathname is not a directory', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('/justFiles/a.json'));
-            const files = file.getFiles();
-            files.then((list) => {
-                chai_1.assert.strictEqual(list, null);
-            });
-        });
+            const files = yield file.getFiles();
+            chai_1.assert.deepEqual(files, []);
+        }));
     });
     describe('.getFilesSync', () => {
         it('returns a list of files objects for a given directory', () => {
@@ -210,26 +205,21 @@ describe('File', () => {
         });
     });
     describe('.getList', () => {
-        it('returns a list of files for a given directory', () => {
+        it('returns a list of files for a given directory', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('/justFiles'));
-            const files = file.getList();
+            const files = yield file.getList();
             const expected = qualifyNames([
                 'justFiles/a.json',
                 'justFiles/b.json',
                 'justFiles/dummy.txt'
             ]);
-            return files
-                .then((list) => {
-                return chai_1.assert.deepEqual(list, expected);
-            });
-        });
-        it('returns null when pathname is not a directory', () => {
+            chai_1.assert.deepEqual(files, expected);
+        }));
+        it('returns an empty array when pathname is not a directory', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('/justFiles/a.json'));
-            const files = file.getList();
-            files.then((list) => {
-                chai_1.assert.strictEqual(list, null);
-            });
-        });
+            const files = yield file.getList();
+            chai_1.assert.deepEqual(files, []);
+        }));
     });
     describe('.isHiddenSync', () => {
         it('returns true when the file is hidden', () => {
@@ -237,8 +227,8 @@ describe('File', () => {
                 './test/fixtures/visibility/.hidden.json',
                 './test/fixtures/visibility/.hidden/.hidden.json'
             ];
-            hiddenPaths.forEach((path) => {
-                const file = new file_1.File(path);
+            hiddenPaths.forEach((hiddenPath) => {
+                const file = new file_1.File(hiddenPath);
                 chai_1.assert.strictEqual(file.isHiddenSync(), true);
             });
         });
@@ -248,26 +238,23 @@ describe('File', () => {
                 './test/fixtures/visibility/.hidden/visible.json',
                 './test/fixtures/visibility/visible'
             ];
-            visiblePaths.forEach((path) => {
-                const file = new file_1.File(path);
+            visiblePaths.forEach((visiblePath) => {
+                const file = new file_1.File(visiblePath);
                 chai_1.assert.strictEqual(file.isHiddenSync(), false);
             });
         });
     });
     describe('.isHidden', () => {
-        it('returns true when the file is hidden', () => {
+        it('returns true when the file is hidden', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File('./test/fixtures/visibility/.hidden.json');
-            file.isHidden()
-                .then((isHidden) => {
-                chai_1.assert.strictEqual(isHidden, true);
-            });
-        });
-        it('returns false when the file is visible', () => {
+            const isHidden = yield file.isHidden();
+            chai_1.assert.isTrue(isHidden);
+        }));
+        it('returns false when the file is visible', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File('./test/fixtures/visibility/');
-            file.isHidden().then((isHidden) => {
-                chai_1.assert.strictEqual(isHidden, false);
-            });
-        });
+            const isHidden = yield file.isHidden();
+            chai_1.assert.isFalse(isHidden);
+        }));
     });
     describe('.getDepthSync', () => {
         it('returns the depth of a directory', () => {
@@ -290,30 +277,30 @@ describe('File', () => {
         });
     });
     describe('.isMatch', () => {
-        it('returns true if the pathname is a match for a given glob', () => {
+        it('returns true if the pathname is a match for a given glob', () => __awaiter(this, void 0, void 0, function* () {
             const paths = [
                 ['./test/fixtures/justFiles/a.json', '*.json'],
                 ['./test/fixtures/justFiles', '*justFiles*']
             ];
-            paths.forEach((testCase) => {
+            paths.forEach((testCase) => __awaiter(this, void 0, void 0, function* () {
                 const [pathname, glob] = testCase;
                 const file = new file_1.File(pathname);
-                chai_1.assert.strictEqual(file.isMatch(glob), true);
-            });
-        });
-        it('returns false if the pathname is not a match for a given glob', () => {
+                chai_1.assert.isTrue(yield file.isMatch(glob));
+            }));
+        }));
+        it('returns false if the pathname is not a match for a given glob', () => __awaiter(this, void 0, void 0, function* () {
             const paths = [
                 ['./test/fixtures/justFiles/a.txt', '*.json'],
                 ['./test/fixtures', '*justFiles*']
             ];
-            paths.forEach((testCase) => {
+            paths.forEach((testCase) => __awaiter(this, void 0, void 0, function* () {
                 const [pathname, glob] = testCase;
                 const file = new file_1.File(pathname);
-                chai_1.assert.strictEqual(file.isMatch(glob), false);
-            });
-        });
+                chai_1.assert.isFalse(yield file.isMatch(glob));
+            }));
+        }));
     });
-    describe('.lastModified', () => {
+    describe('.lastModifiedSync', () => {
         before(() => {
             fs.mkdirSync(getFixturePath('dates'));
         });
@@ -363,7 +350,7 @@ describe('File', () => {
             });
         });
     });
-    describe('.lastAccessed', () => {
+    describe('.lastAccessedSync', () => {
         before(() => {
             fs.mkdirSync(getFixturePath('dates'));
         });
@@ -414,7 +401,7 @@ describe('File', () => {
             });
         });
     });
-    describe('.lastChanged', () => {
+    describe('.lastChangedSync', () => {
         let statSync;
         before(() => {
             fs.mkdirSync(getFixturePath('dates'));
@@ -479,7 +466,7 @@ describe('File', () => {
             });
         });
     });
-    describe('.size', () => {
+    describe('.sizeSync', () => {
         it('returns the size of a pathname in bytes', () => {
             const pathname = new file_1.File(getFixturePath('sizes/10b.txt'));
             chai_1.assert.equal(pathname.sizeSync(), 10);
@@ -492,45 +479,35 @@ describe('File', () => {
         });
     });
     describe('.isWritable', () => {
-        it('returns true when the file has write permission', () => {
+        it('returns true when the file has write permission', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('justFiles/a.json'));
-            return file.isWritable()
-                .then((isWritable) => {
-                chai_1.assert.strictEqual(isWritable, true);
-            });
-        });
-        it('returns false when the file does not have write permission', () => {
+            const isWritable = yield file.isWritable();
+            chai_1.assert.isTrue(isWritable);
+        }));
+        it('returns false when the file does not have write permission', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('permissions/notWritable.json'));
-            return file.isWritable()
-                .then((isWritable) => {
-                chai_1.assert.strictEqual(isWritable, false);
-            });
-        });
+            const isWritable = yield file.isWritable();
+            chai_1.assert.isFalse(isWritable);
+        }));
     });
     describe('.isReadable', () => {
-        it('returns true when the file has read permission', () => {
+        it('returns true when the file has read permission', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('permissions/readWrite.json'));
-            file.isReadable()
-                .then((isReadable) => {
-                chai_1.assert.strictEqual(isReadable, true);
-            });
-        });
+            const isReadable = yield file.isReadable();
+            chai_1.assert.isTrue(isReadable);
+        }));
     });
     describe('.isExecutable', () => {
-        it('returns true when the file has read permission', () => {
+        it('returns true when the file has read permission', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('permissions/executable.sh'));
-            file.isReadable()
-                .then((isExecutable) => {
-                chai_1.assert.strictEqual(isExecutable, true);
-            });
-        });
-        it('returns false when the file does not have read permission', () => {
+            const isExecutable = yield file.isExecutable();
+            chai_1.assert.isTrue(isExecutable);
+        }));
+        it('returns false when the file does not have read permission', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('permissions/notExecutable.sh'));
-            file.isExecutable()
-                .then((isExecutable) => {
-                chai_1.assert.strictEqual(isExecutable, false);
-            });
-        });
+            const isExecutable = yield file.isExecutable();
+            chai_1.assert.isFalse(isExecutable);
+        }));
     });
     describe('.delete', () => {
         before(() => {
@@ -546,24 +523,23 @@ describe('File', () => {
                 modifier: 'hours'
             });
         });
-        it('deletes a file that exists', () => {
+        it('deletes a file that exists', () => __awaiter(this, void 0, void 0, function* () {
             const file = new file_1.File(getFixturePath('delete/a.txt'));
-            return file.delete()
-                .then(() => {
-                chai_1.assert.throws(() => {
-                    fs.statSync(getFixturePath('delete/a.txt'));
-                }, /ENOENT/);
-            });
-        });
+            yield file.delete();
+            chai_1.assert.throws(() => {
+                fs.statSync(getFixturePath('delete/a.txt'));
+            }, /ENOENT/);
+        }));
     });
     describe('.getFixturePath', () => {
         it('returns the absolute path for a relative pathname', () => {
             const relativePath = './test/fixtures/justFiles/a.json';
             const file = new file_1.File(relativePath);
-            chai_1.assert.equal(file.getAbsolutePath(), getAbsolutePath());
+            chai_1.assert.equal(file.getAbsolutePath(), getAbsolutePath(relativePath));
         });
         it('returns the absolute path for an absolute pathname', () => {
-            const absolutePath = getAbsolutePath();
+            const relativePath = './test/fixtures/justFiles/a.json';
+            const absolutePath = getAbsolutePath(relativePath);
             const file = new file_1.File(absolutePath);
             chai_1.assert.equal(file.getAbsolutePath(), absolutePath);
         });
@@ -575,7 +551,8 @@ describe('File', () => {
             chai_1.assert.equal(file.getCanonicalPath(), getCanonicalPath('./test/fixtures/justFiles/a.json'));
         });
         it('returns the canonical path for an absolute pathname', () => {
-            const absolutePath = getAbsolutePath();
+            const relativePath = './test/fixtures/justFiles/a.json';
+            const absolutePath = getAbsolutePath(relativePath);
             const canonicalPath = getCanonicalPath('./test/fixtures/justFiles/a.json');
             const file = new file_1.File(absolutePath);
             chai_1.assert.equal(file.getCanonicalPath(), canonicalPath);

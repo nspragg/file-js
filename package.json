@@ -99,7 +99,6 @@
     }
   },
   "dependencies": {
-    "bluebird": "^3.4.7",
     "minimatch": "^3.0.3"
   }
 }

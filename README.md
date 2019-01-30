@@ -27,20 +27,9 @@ npm install --save file-js
 
 * File glob matching
 * File listings
-* File locking
 * Assert file permissions
 * Supports promises
 * Supports synchronous and asynchronous methods
-
-## Coming soon
-
-* File matching with regular expressions
-* create empty file
-* Assert existence of files via `.exists()`
-* WalkSync
-* Walk
-* copyRecursively
-* deleteRecursively
 
 ## Usage
 
@@ -48,10 +37,8 @@ npm install --save file-js
 const File = require('file-js');
 
 const file = File.create('myDir');
-file.getList()
-  then((files) => {
-    files.each(console.log);
-  });
+const files = await file.getList();
+files.forEach(console.log);
 
 const file = File.create('myDirectory');
 if (file.isDirectorySync()) {

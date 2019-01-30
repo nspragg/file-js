@@ -8,62 +8,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// import * as Promise from 'bluebird';
-const path = require("path");
-const fileGlob = require("minimatch");
-const util = require("util");
-const bluebird = require("bluebird");
 const fs_1 = require("fs");
-const statAsync = util.promisify(fs_1.stat);
-const accessAsync = util.promisify(fs_1.access);
-const readdirAsync = bluebird.promisify(fs_1.readdir);
-const unlinkAsync = util.promisify(fs_1.unlink);
+const fileGlob = require("minimatch");
+const path = require("path");
+const fsp = require("./fsp");
 function joinWith(dir) {
     return (file) => {
         return path.join(dir, file);
     };
 }
-/**
- * @class
- */
 class File {
     constructor(pathname) {
         this.dir = process.cwd();
         this.pathname = pathname;
     }
-    getStatsSync() {
-        return fs_1.statSync(this.pathname);
-    }
-    getStats() {
-        console.log(this.pathname);
-        return statAsync(this.pathname);
-    }
-    isHiddenFile() {
-        return (/^\./).test(path.basename(this.pathname));
-    }
-    isHiddenDirectory() {
-        return (/(^|\/)\.[^\/\.]/g).test(this.pathname);
-    }
-    depth(pathname) {
-        return pathname.split(path.sep).length - 1;
-    }
-    access(permission) {
-        let hasPermission = true;
-        return accessAsync(this.pathname, permission)
-            .catch(() => hasPermission = false)
-            .then(() => hasPermission);
-    }
-    checkAsyncStats(type) {
-        // return this.getStats().then(stats => stats[type]());
-        return this.getStats().then((stats) => {
-            console.log(stats);
-            stats[type]();
-        });
-    }
     /**
      * Synchronously determine if pathname is a directory
      *
-     * @instance
      * @memberOf File
      * @method
      * isDirectorySync
@@ -71,7 +32,7 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('myDirectory');
+     * const file = new File('myDirectory');
      * if (file.isDirectorySync()) {
      *    console.log('processing directory');
      * }
@@ -82,7 +43,6 @@ class File {
     /**
      * Synchronously determine if pathname is a socket
      *
-     * @instance
      * @memberOf File
      * @method
      * isSocketSync
@@ -90,7 +50,7 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('mysocket');
+     * const file = new File('mysocket');
      * if (file.isSocketSync()) {
      *    console.log('processing socket');
      * }
@@ -101,7 +61,6 @@ class File {
     /**
      * Synchronously determine if pathname is a file
      *
-     * @instance
      * @memberOf File
      * @method
      * isFileSync
@@ -109,7 +68,7 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('myDirectory');
+     * const file = new File('myDirectory');
      * if (file.isFileSync()) {
      *    console.log('processing file');
      * }
@@ -120,7 +79,6 @@ class File {
     /**
      * Determine if pathname is a directory
      *
-     * @instance
      * @memberOf File
      * @method
      * isDirectory
@@ -129,11 +87,9 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('myDirectory');
-     * file.isDirectory((isDirectory) => {
-     *   console.log(isDirectory);
-     * });
-     *
+     * const file = new File('myDirectory');
+     * const isDirectory = await file.isDirectory((isDirectory);
+     * console.log(isDirectory);
      */
     isDirectory() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -143,7 +99,6 @@ class File {
     /**
      * Determine if pathname is a Socket
      *
-     * @instance
      * @memberOf File
      * @method
      * isSocket
@@ -152,39 +107,38 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('mySocket');
-     * file.isSocket((isSocket) => {
-     *   console.log(isSocket);
-     * });
-     *
+     * const file = new File('mySocket');
+     * const isSocket = await file.isSocket((isSocket));
+     * console.log(isSocket);
      */
     isSocket() {
-        return this.checkAsyncStats('isSocket');
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.checkAsyncStats('isSocket');
+        });
     }
     /**
      * Determine if pathname is a file
      *
-     * @instance
      * @memberOf File
      * @method
-     * isDirectory
+     * isFile
      * @return If the Promise fulfils, the fulfilment value is
      * a boolean indicating if the pathname is a file
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('myDirectory');
-     * file.isFile((isFile) => {
-     *   console.log(isFile);
-     * });
+     * const file = new File('myDirectory');
+     * const isFile = await file.isFile();
+     * console.log(isFile);
      */
     isFile() {
-        return this.checkAsyncStats('isFile');
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.checkAsyncStats('isFile');
+        });
     }
     /**
      * Synchronously determine if pathname is a hidden file
      *
-     * @instance
      * @memberOf File
      * @method
      * isHiddenSync
@@ -192,7 +146,7 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('./myHiddenFile');
+     * const file = new File('./myHiddenFile');
      * if (file.isHiddenSync()) {
      *    console.log('processing hidden file');
      * }
@@ -206,24 +160,21 @@ class File {
     /**
      * Determine if pathname is a file
      *
-     * @instance
      * @memberOf File
      * @method
-     * isDirectory
+     * isHidden
      * @return If the Promise fulfils, the fulfilment value is
-     * a boolean indicating if the pathname is a file
+     * a boolean indicating if the pathname is a hidden file
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('myDirectory');
-     * file.isFile((isFile) => {
-     *   console.log(isFile);
-     * });
+     * const file = new File('myDirectory');
+     * const isHidden = await file.isHidden();
+     * console.log(isHidden);
      */
     isHidden() {
-        return this.isDirectory()
-            .then((isDirectory) => {
-            if (!isDirectory) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!(yield this.isDirectory())) {
                 return this.isHiddenFile();
             }
             return this.isHiddenDirectory();
@@ -232,7 +183,6 @@ class File {
     /**
      * Synchronously get list of files, if pathname is a directory
      *
-     * @instance
      * @memberOf File
      * @method
      * getListSync
@@ -240,13 +190,14 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('./myHiddenFile');
+     * const file = new File('./myHiddenFile');
      * const files = file.getListSync();
      * console.log(files);
      */
     getListSync() {
         if (this.isDirectorySync()) {
-            return fs_1.readdirSync(this.pathname).map((file) => {
+            return fs_1.readdirSync(this.pathname)
+                .map((file) => {
                 return path.join(this.pathname, file);
             });
         }
@@ -255,37 +206,32 @@ class File {
     /**
      * Get list of file objects, if pathname is a directory
      *
-     * @instance
      * @memberOf File
      * @method
      * getList
-     * @param {string=} glob - file glob
      * @return a promise. If the Promise fulfils, the fulfilment value is
      * a list of pathnames
      * @example
      * import File from 'file-js';
      *
      * // get all json files
-     * const file = File.create('./myDirectory');
-     * file.getFiles('*.json')
-     * .then((jsonFiles) => {
-     *    console.log(jsonFiles);
-     * });
+     * const file = new File('./myDirectory');
+     * const files = await file.getFiles('*.json');
+     * console.log(jsonFiles);
      */
     getList(glob) {
-        return this.getFiles(glob)
-            .then((list) => {
-            if (!list)
-                return [];
-            return list.map(pathname => pathname.getName());
+        return __awaiter(this, void 0, void 0, function* () {
+            const files = yield this.getFiles(glob);
+            if (files.length > 0) {
+                return files.map(pathname => pathname.getName());
+            }
+            return [];
         });
     }
     /**
      * Get list of file objects, if pathname is a directory
      *
-     * @instance
      * @memberOf File
-     * @param {string=} glob - file glob
      * @method
      * getFiles
      * @return a promise. If the Promise fulfils, the fulfilment value is
@@ -294,30 +240,31 @@ class File {
      * import File from 'file-js';
      *
      * // get last modified time of all json files
-     * const file = File.create('./myDirectory');
-     * file.getFiles('*.json')
-     * .then((jsonFiles) => {
-     *    console.log(jsonFiles.map(file => file.lastModifiedSync()));
-     * });
+     * const file = new File('./myDirectory');
+     * const files = await file.getFiles('*.json');
+     * console.log(jsonFiles.map(file => file.lastModifiedSync()));
      */
     getFiles(glob) {
-        if (!this.isDirectory())
-            return Promise.resolve(null);
-        const results = readdirAsync(this.pathname)
-            .map(joinWith(this.pathname))
-            .then((list) => {
-            if (!list)
-                return Promise.resolve(null);
-            return list.map(pathname => new File(pathname));
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!(yield this.isDirectory())) {
+                return [];
+            }
+            const files = yield fsp.readdir(this.pathname);
+            const results = files
+                .map(joinWith(this.pathname))
+                .map(pathname => new File(pathname));
+            if (results.length === 0) {
+                return [];
+            }
+            if (glob) {
+                return results.filter(file => file.isMatch(glob));
+            }
+            return results;
         });
-        if (glob)
-            return results.filter(file => file.isMatch(glob));
-        return results;
     }
     /**
      * Synchronously get list of file objects, if pathname is a directory
      *
-     * @instance
      * @memberOf File
      * @method
      * getFileSync
@@ -325,7 +272,7 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('./myHiddenFile');
+     * const file = new File('./myHiddenFile');
      * const files = file.getFileSync();
      * console.log(files);
      */
@@ -335,8 +282,9 @@ class File {
                 .map((pathname) => {
                 return new File(pathname);
             });
-            if (glob)
+            if (glob) {
                 return files.filter(file => file.isMatch(glob));
+            }
             return files;
         }
         return null;
@@ -344,7 +292,6 @@ class File {
     /**
      * Synchronously calculate the depth of a directory
      *
-     * @instance
      * @memberOf File
      * @method
      * getDepthSync
@@ -352,7 +299,7 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('myDirectory');
+     * const file = new File('myDirectory');
      * console.log(file.getDepthSync());
      */
     getDepthSync() {
@@ -364,7 +311,6 @@ class File {
     /**
      * Returns the pathname as a string
      *
-     * @instance
      * @memberOf File
      * @method
      * getName
@@ -372,7 +318,7 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('myDirectory');
+     * const file = new File('myDirectory');
      * console.log(file.getName());
      */
     getName() {
@@ -381,7 +327,6 @@ class File {
     /**
      * Returns the absolutePath
      *
-     * @instance
      * @memberOf File
      * @method
      * getAbsolutePath
@@ -389,7 +334,7 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('myFile');
+     * const file = new File('myFile');
      * console.log(file.getAbsolutePath());
      */
     getAbsolutePath() {
@@ -401,7 +346,6 @@ class File {
     /**
      * Returns the canonical path
      *
-     * @instance
      * @memberOf File
      * @method
      * getCanonicalPath
@@ -409,7 +353,7 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('myFile');
+     * const file = new File('myFile');
      * console.log(file.getCanonicalPath());
      */
     getCanonicalPath() {
@@ -418,7 +362,6 @@ class File {
     /**
      * Returns the file extension.
      *
-     * @instance
      * @memberOf File
      * @method
      * getPathExtension
@@ -426,11 +369,43 @@ class File {
      * @example
      * import File from 'file-js';
      *
-     * const file = File.create('./tmp.sh');
+     * const file = new File('./tmp.sh');
      * console.log(file.getPathExtension()); // sh
      */
     getPathExtension() {
         return path.extname(this.pathname).substring(1);
+    }
+    lastModifiedSync() {
+        return this.getStatsSync().mtime;
+    }
+    lastAccessedSync() {
+        return this.getStatsSync().atime;
+    }
+    lastChangedSync() {
+        return this.getStatsSync().ctime;
+    }
+    sizeSync() {
+        return this.getStatsSync().size;
+    }
+    isWritable() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.access(fs_1.constants.W_OK);
+        });
+    }
+    isReadable() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.access(fs_1.constants.R_OK);
+        });
+    }
+    isExecutable() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.access(fs_1.constants.X_OK);
+        });
+    }
+    delete() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return fsp.unlink(this.pathname);
+        });
     }
     isMatch(globPattern) {
         const glob = new fileGlob.Minimatch(globPattern, {
@@ -438,29 +413,39 @@ class File {
         });
         return glob.match(this.pathname);
     }
-    lastModifiedSync() {
-        return this.getStatsSync()['mtime'];
+    getStatsSync() {
+        return fs_1.statSync(this.pathname);
     }
-    lastAccessedSync() {
-        return this.getStatsSync()['atime'];
+    getStats() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return fsp.stat(this.pathname);
+        });
     }
-    lastChangedSync() {
-        return this.getStatsSync()['ctime'];
+    isHiddenFile() {
+        return (/^\./).test(path.basename(this.pathname));
     }
-    sizeSync() {
-        return this.getStatsSync().size;
+    isHiddenDirectory() {
+        return (/(^|\/)\.[^\/\.]/g).test(this.pathname);
     }
-    isWritable() {
-        return this.access(fs_1.constants.W_OK);
+    depth(pathname) {
+        return pathname.split(path.sep).length - 1;
     }
-    isReadable() {
-        return this.access(fs_1.constants.R_OK);
+    access(permission) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield fsp.access(this.pathname, permission);
+            }
+            catch (err) {
+                return false;
+            }
+            return true;
+        });
     }
-    isExecutable() {
-        return this.access(fs_1.constants.X_OK);
-    }
-    delete() {
-        return unlinkAsync(this.pathname);
+    checkAsyncStats(type) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const stats = yield this.getStats();
+            return stats[type]();
+        });
     }
 }
 exports.File = File;
