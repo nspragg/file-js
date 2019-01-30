@@ -24,7 +24,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#getAbsolutePath">getAbsolutePath</a></li><li data-type='method'><a href="File.html#getCanonicalPath">getCanonicalPath</a></li><li data-type='method'><a href="File.html#getDepthSync">getDepthSync</a></li><li data-type='method'><a href="File.html#getFiles">getFiles</a></li><li data-type='method'><a href="File.html#getFileSync">getFileSync</a></li><li data-type='method'><a href="File.html#getList">getList</a></li><li data-type='method'><a href="File.html#getListSync">getListSync</a></li><li data-type='method'><a href="File.html#getName">getName</a></li><li data-type='method'><a href="File.html#getPathExtension">getPathExtension</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li><li data-type='method'><a href="File.html#isHiddenSync">isHiddenSync</a></li><li data-type='method'><a href="File.html#isSocket">isSocket</a></li><li data-type='method'><a href="File.html#isSocketSync">isSocketSync</a></li><li data-type='method'><a href="File.html#rename">rename</a></li><li data-type='method'><a href="File.html#withLock">withLock</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2>
 </nav>
 
 <div id="main">
@@ -39,566 +39,463 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import Promise from 'bluebird';
-import path from 'path';
-import fileGlob from 'minimatch';
-
-import fsp from './fsp';
-import filelock from './lock';
-
-function joinWith(dir) {
-  return (file) => {
-    return path.join(dir, file);
-  };
-}
-
-/**
- * @class
- */
-class File {
-  constructor(pathname) {
-    this._dir = process.cwd();
-    this._pathname = pathname;
-  }
-
-  _getStatsSync() {
-    return fsp.statSync(this._pathname);
-  }
-
-  _getStats() {
-    return fsp.statAsync(this._pathname);
-  }
-
-  _isHiddenFile() {
-    return (/^\./).test(path.basename(this._pathname));
-  }
-
-  _isHiddenDirectory() {
-    return (/(^|\/)\.[^\/\.]/g).test(this._pathname);
-  }
-
-  _depth(pathname) {
-    return pathname.split(path.sep).length - 1;
-  }
-
-  _access(permission) {
-    let hasPermission = true;
-
-    return fsp.accessAsync(this._pathname, permission)
-      .catch(() => hasPermission = false)
-      .then(() => hasPermission);
-  }
-
-  _checkAsyncStats(type) {
-    return this._getStats().then((stats) => stats[type]());
-  }
-
-  /**
-   * Synchronously determine if pathname is a directory
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * isDirectorySync
-   * @return boolean
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('myDirectory');
-   * if (file.isDirectorySync()) {
-   *    console.log('processing directory');
-   * }
-   */
-  isDirectorySync() {
-    return this._getStatsSync().isDirectory();
-  }
-
-  /**
-   * Synchronously determine if pathname is a socket
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * isSocketSync
-   * @return boolean
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('mysocket');
-   * if (file.isSocketSync()) {
-   *    console.log('processing socket');
-   * }
-   */
-  isSocketSync() {
-    return this._getStatsSync().isSocket();
-  }
-
-  /**
-   * Synchronously determine if pathname is a file
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * isFileSync
-   * @return boolean
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('myDirectory');
-   * if (file.isFileSync()) {
-   *    console.log('processing file');
-   * }
-   */
-  isFileSync() {
-    return this._getStatsSync().isFile();
-  }
-
-  /**
-   * Determine if pathname is a directory
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * isDirectory
-   * @return If the Promise fulfils, the fulfilment value is
-   * a boolean indicating if the pathname is a directory
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('myDirectory');
-   * file.isDirectory((isDirectory) => {
-   *   console.log(isDirectory);
-   * });
-   *
-   */
-  isDirectory() {
-    return this._checkAsyncStats('isDirectory');
-  }
-
-  /**
-   * Determine if pathname is a Socket
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * isSocket
-   * @return If the Promise fulfils, the fulfilment value is
-   * a boolean indicating if the pathname is a Socket
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('mySocket');
-   * file.isSocket((isSocket) => {
-   *   console.log(isSocket);
-   * });
-   *
-   */
-  isSocket() {
-    return this._checkAsyncStats('isSocket');
-  }
-
-  /**
-   * Determine if pathname is a file
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * isDirectory
-   * @return If the Promise fulfils, the fulfilment value is
-   * a boolean indicating if the pathname is a file
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('myDirectory');
-   * file.isFile((isFile) => {
-   *   console.log(isFile);
-   * });
-   */
-  isFile() {
-    return this._checkAsyncStats('isFile');
-  }
-
-  /**
-   * Synchronously determine if pathname is a hidden file
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * isHiddenSync
-   * @return boolean
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('./myHiddenFile');
-   * if (file.isHiddenSync()) {
-   *    console.log('processing hidden file');
-   * }
-   */
-  isHiddenSync() {
-    if (!this.isDirectorySync()) {
-      return this._isHiddenFile();
-    }
-    return this._isHiddenDirectory();
-  }
-
-  /**
-   * Determine if pathname is a file
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * isDirectory
-   * @return If the Promise fulfils, the fulfilment value is
-   * a boolean indicating if the pathname is a file
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('myDirectory');
-   * file.isFile((isFile) => {
-   *   console.log(isFile);
-   * });
-   */
-  isHidden() {
-    this.isDirectory()
-      .then((isDirectory) => {
-        if (!isDirectory) {
-          return this._isHiddenFile();
-        }
-        return this._isHiddenDirectory();
-      });
-  }
-
-  /**
-   *  Renames the abstract pathname
-   *
-   * @instance
-   * @memberOf File
-   * @param {string|File} pathname - pathname either as a string or File instance
-   * @method
-   * rename
-   * @return If the Promise fulfils, the fulfilment value is undefined
-   * @example
-   * import File from 'file-js';
-   *
-   * const original = File.create('fileA');
-   * const renameTo = File.create('fileB');
-   * original
-   *  .rename(renameTo)
-   *  .then(() => {
-   *     console.log(original.getName()) // prints fileA
-   *  });
-   */
-  rename(pathname) {
-    const newname = pathname instanceof File ? pathname.getName() : pathname;
-
-    return fsp
-      .renameAsync(this._pathname, newname)
-      .then(() => {
-        this._pathname = newname;
-      });
-  }
-
-  /**
-   * Synchronously get list of files, if pathname is a directory
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * getListSync
-   * @return array of files
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('./myHiddenFile');
-   * const files = file.getListSync();
-   * console.log(files);
-   */
-  getListSync() {
-    if (this.isDirectorySync()) {
-      return fsp.readdirSync(this._pathname).map((file) => {
-        return path.join(this._pathname, file);
-      });
-    }
-    return null;
-  }
-
-  /**
-   * Get list of file objects, if pathname is a directory
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * getList
-   * @param {string=} glob - file glob
-   * @return a promise. If the Promise fulfils, the fulfilment value is
-   * a list of pathnames
-   * @example
-   * import File from 'file-js';
-   *
-   * // get all json files
-   * const file = File.create('./myDirectory');
-   * file.getFiles('*.json')
-   * .then((jsonFiles) => {
-   *    console.log(jsonFiles);
-   * });
-   */
-  getList(glob) {
-    return this.getFiles(glob)
-      .then((list) => {
-        if (!list) return [];
-
-        return list.map((pathname) => pathname.getName());
-      });
-  }
-
-  /**
-   * Get list of file objects, if pathname is a directory
-   *
-   * @instance
-   * @memberOf File
-   * @param {string=} glob - file glob
-   * @method
-   * getFiles
-   * @return a promise. If the Promise fulfils, the fulfilment value is
-   * a list of File objects
-   * @example
-   * import File from 'file-js';
-   *
-   * // get last modified time of all json files
-   * const file = File.create('./myDirectory');
-   * file.getFiles('*.json')
-   * .then((jsonFiles) => {
-   *    console.log(jsonFiles.map(file => file.lastModifiedSync()));
-   * });
-   */
-  getFiles(glob) {
-    if (!this.isDirectory()) return Promise.resolve(null);
-
-    const results = fsp
-      .readdirAsync(this._pathname)
-      .map(joinWith(this._pathname))
-      .then((list) => {
-        if (!list) return Promise.resolve(null);
-
-        return list.map((pathname) => File.create(pathname));
-      });
-
-    if (glob) return results.filter((file) => file.isMatch(glob));
-
-    return results;
-  }
-
-  /**
-   * Synchronously get list of file objects, if pathname is a directory
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * getFileSync
-   * @return array of files
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('./myHiddenFile');
-   * const files = file.getFileSync();
-   * console.log(files);
-   */
-  getFilesSync(glob) {
-    if (this.isDirectorySync()) {
-      const files = this.getListSync()
-        .map((pathname) => {
-          return File.create(pathname);
-        });
-
-      if (glob) return files.filter((file) => file.isMatch(glob));
-
-      return files;
-    }
-    return null;
-  }
-
-  /**
-   * Synchronously caculate the depth of a directory
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * getDepthSync
-   * @return boolean
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('myDirectory');
-   * console.log(file.getDepthSync());
-   */
-  getDepthSync() {
-    if (!this.isDirectorySync()) {
-      return this._depth(path.dirname(this._pathname));
-    }
-    return this._depth(this._pathname);
-  }
-
-  /**
-   * Returns the pathname as a string
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * getName
-   * @return String
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('myDirectory');
-   * console.log(file.getName());
-   */
-  getName() {
-    return this._pathname;
-  }
-
-  /**
-   * Returns the absolutePath
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * getAbsolutePath
-   * @return String
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('myFile');
-   * console.log(file.getAbsolutePath());
-   */
-  getAbsolutePath() {
-    if (path.isAbsolute(this._pathname)) {
-      return this._pathname;
-    }
-    return [this._dir, this._pathname].join(path.sep);
-  }
-
-  /**
-   * Returns the canonical path
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * getCanonicalPath
-   * @return String
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('myFile');
-   * console.log(file.getCanonicalPath());
-   */
-  getCanonicalPath() {
-    return path.normalize(this.getAbsolutePath());
-  }
-
-  /**
-   * Returns the file extension.
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * getPathExtension
-   * @return String
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('./tmp.sh');
-   * console.log(file.getPathExtension()); // sh
-   */
-  getPathExtension() {
-    return path.extname(this._pathname).substring(1);
-  }
-
-  isMatch(globPattern) {
-    const glob = new fileGlob.Minimatch(globPattern, {
-      matchBase: true
+            <pre class="prettyprint source linenums"><code>"use strict";
+var __awaiter = (this &amp;&amp; this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-    return glob.match(this._pathname);
-  }
-
-  lastModifiedSync() {
-    return this._getStatsSync()['mtime'];
-  }
-
-  lastAccessedSync() {
-    return this._getStatsSync()['atime'];
-  }
-
-  lastChangedSync() {
-    return this._getStatsSync()['ctime'];
-  }
-
-  sizeSync() {
-    return this._getStatsSync().size;
-  }
-
-  isWritable() {
-    return this._access(fsp.W_OK);
-  }
-
-  isReadable() {
-    return this._access(fsp.R_OK);
-  }
-
-  isExecutable() {
-    return this._access(fsp.X_OK);
-  }
-
-  delete() {
-    return fsp.unlinkAsync(this._pathname);
-  }
-
-  /**
-   * Locks the pathname
-   *
-   * @instance
-   * @memberOf File
-   * @method
-   * withLock
-   * @return returning value of function
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create('myFile');
-   * file.with(() => {
-   *   if (file.isFileSync()) {
-   *     file.delete();
-   *   } 
-   * });
-   */
-  withLock(fn) {
-    return filelock.lockAsync(this._pathname)
-      .then(() => {
-        return fn();
-      })
-      .finally(() => {
-        filelock.unlockAsync(this._pathname);
-      });
-  }
-
-  /**
-   * Static factory method to create an instance of File
-   *
-   * @static
-   * @memberOf File
-   * @method
-   * create
-   * @return File instance
-   * @example
-   * import File from 'file-js';
-   *
-   * const file = File.create();
-   */
-  static create(filename) {
-    return new File(filename);
-  }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs_1 = require("fs");
+const fileGlob = require("minimatch");
+const path = require("path");
+const fsp = require("./fsp");
+function joinWith(dir) {
+    return (file) => {
+        return path.join(dir, file);
+    };
 }
-
-module.exports.create = File.create;</code></pre>
+class File {
+    constructor(pathname) {
+        this.dir = process.cwd();
+        this.pathname = pathname;
+    }
+    /**
+     * Synchronously determine if pathname is a directory
+     *
+     * @memberOf File
+     * @method
+     * isDirectorySync
+     * @return boolean
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('myDirectory');
+     * if (file.isDirectorySync()) {
+     *    console.log('processing directory');
+     * }
+     */
+    isDirectorySync() {
+        return this.getStatsSync().isDirectory();
+    }
+    /**
+     * Synchronously determine if pathname is a socket
+     *
+     * @memberOf File
+     * @method
+     * isSocketSync
+     * @return boolean
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('mysocket');
+     * if (file.isSocketSync()) {
+     *    console.log('processing socket');
+     * }
+     */
+    isSocketSync() {
+        return this.getStatsSync().isSocket();
+    }
+    /**
+     * Synchronously determine if pathname is a file
+     *
+     * @memberOf File
+     * @method
+     * isFileSync
+     * @return boolean
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('myDirectory');
+     * if (file.isFileSync()) {
+     *    console.log('processing file');
+     * }
+     */
+    isFileSync() {
+        return this.getStatsSync().isFile();
+    }
+    /**
+     * Determine if pathname is a directory
+     *
+     * @memberOf File
+     * @method
+     * isDirectory
+     * @return If the Promise fulfils, the fulfilment value is
+     * a boolean indicating if the pathname is a directory
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('myDirectory');
+     * const isDirectory = await file.isDirectory((isDirectory);
+     * console.log(isDirectory);
+     */
+    isDirectory() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.checkAsyncStats('isDirectory');
+        });
+    }
+    /**
+     * Determine if pathname is a Socket
+     *
+     * @memberOf File
+     * @method
+     * isSocket
+     * @return If the Promise fulfils, the fulfilment value is
+     * a boolean indicating if the pathname is a Socket
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('mySocket');
+     * const isSocket = await file.isSocket((isSocket));
+     * console.log(isSocket);
+     */
+    isSocket() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.checkAsyncStats('isSocket');
+        });
+    }
+    /**
+     * Determine if pathname is a file
+     *
+     * @memberOf File
+     * @method
+     * isFile
+     * @return If the Promise fulfils, the fulfilment value is
+     * a boolean indicating if the pathname is a file
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('myDirectory');
+     * const isFile = await file.isFile();
+     * console.log(isFile);
+     */
+    isFile() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.checkAsyncStats('isFile');
+        });
+    }
+    /**
+     * Synchronously determine if pathname is a hidden file
+     *
+     * @memberOf File
+     * @method
+     * isHiddenSync
+     * @return boolean
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./myHiddenFile');
+     * if (file.isHiddenSync()) {
+     *    console.log('processing hidden file');
+     * }
+     */
+    isHiddenSync() {
+        if (!this.isDirectorySync()) {
+            return this.isHiddenFile();
+        }
+        return this.isHiddenDirectory();
+    }
+    /**
+     * Determine if pathname is a file
+     *
+     * @memberOf File
+     * @method
+     * isHidden
+     * @return If the Promise fulfils, the fulfilment value is
+     * a boolean indicating if the pathname is a hidden file
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('myDirectory');
+     * const isHidden = await file.isHidden();
+     * console.log(isHidden);
+     */
+    isHidden() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!(yield this.isDirectory())) {
+                return this.isHiddenFile();
+            }
+            return this.isHiddenDirectory();
+        });
+    }
+    /**
+     * Synchronously get list of files, if pathname is a directory
+     *
+     * @memberOf File
+     * @method
+     * getListSync
+     * @return array of files
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./myHiddenFile');
+     * const files = file.getListSync();
+     * console.log(files);
+     */
+    getListSync() {
+        if (this.isDirectorySync()) {
+            return fs_1.readdirSync(this.pathname)
+                .map((file) => {
+                return path.join(this.pathname, file);
+            });
+        }
+        return null;
+    }
+    /**
+     * Get list of file objects, if pathname is a directory
+     *
+     * @memberOf File
+     * @method
+     * getList
+     * @return a promise. If the Promise fulfils, the fulfilment value is
+     * a list of pathnames
+     * @example
+     * import File from 'file-js';
+     *
+     * // get all json files
+     * const file = new File('./myDirectory');
+     * const files = await file.getFiles('*.json');
+     * console.log(jsonFiles);
+     */
+    getList(glob) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const files = yield this.getFiles(glob);
+            if (files.length > 0) {
+                return files.map(pathname => pathname.getName());
+            }
+            return [];
+        });
+    }
+    /**
+     * Get list of file objects, if pathname is a directory
+     *
+     * @memberOf File
+     * @method
+     * getFiles
+     * @return a promise. If the Promise fulfils, the fulfilment value is
+     * a list of File objects
+     * @example
+     * import File from 'file-js';
+     *
+     * // get last modified time of all json files
+     * const file = new File('./myDirectory');
+     * const files = await file.getFiles('*.json');
+     * console.log(jsonFiles.map(file => file.lastModifiedSync()));
+     */
+    getFiles(glob) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!(yield this.isDirectory())) {
+                return [];
+            }
+            const files = yield fsp.readdir(this.pathname);
+            const results = files
+                .map(joinWith(this.pathname))
+                .map(pathname => new File(pathname));
+            if (results.length === 0) {
+                return [];
+            }
+            if (glob) {
+                return results.filter(file => file.isMatch(glob));
+            }
+            return results;
+        });
+    }
+    /**
+     * Synchronously get list of file objects, if pathname is a directory
+     *
+     * @memberOf File
+     * @method
+     * getFileSync
+     * @return array of files
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./myHiddenFile');
+     * const files = file.getFileSync();
+     * console.log(files);
+     */
+    getFilesSync(glob) {
+        if (this.isDirectorySync()) {
+            const files = this.getListSync()
+                .map((pathname) => {
+                return new File(pathname);
+            });
+            if (glob) {
+                return files.filter(file => file.isMatch(glob));
+            }
+            return files;
+        }
+        return null;
+    }
+    /**
+     * Synchronously calculate the depth of a directory
+     *
+     * @memberOf File
+     * @method
+     * getDepthSync
+     * @return boolean
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('myDirectory');
+     * console.log(file.getDepthSync());
+     */
+    getDepthSync() {
+        if (!this.isDirectorySync()) {
+            return this.depth(path.dirname(this.pathname));
+        }
+        return this.depth(this.pathname);
+    }
+    /**
+     * Returns the pathname as a string
+     *
+     * @memberOf File
+     * @method
+     * getName
+     * @return String
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('myDirectory');
+     * console.log(file.getName());
+     */
+    getName() {
+        return this.pathname;
+    }
+    /**
+     * Returns the absolutePath
+     *
+     * @memberOf File
+     * @method
+     * getAbsolutePath
+     * @return String
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('myFile');
+     * console.log(file.getAbsolutePath());
+     */
+    getAbsolutePath() {
+        if (path.isAbsolute(this.pathname)) {
+            return this.pathname;
+        }
+        return [this.dir, this.pathname].join(path.sep);
+    }
+    /**
+     * Returns the canonical path
+     *
+     * @memberOf File
+     * @method
+     * getCanonicalPath
+     * @return String
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('myFile');
+     * console.log(file.getCanonicalPath());
+     */
+    getCanonicalPath() {
+        return path.normalize(this.getAbsolutePath());
+    }
+    /**
+     * Returns the file extension.
+     *
+     * @memberOf File
+     * @method
+     * getPathExtension
+     * @return String
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./tmp.sh');
+     * console.log(file.getPathExtension()); // sh
+     */
+    getPathExtension() {
+        return path.extname(this.pathname).substring(1);
+    }
+    lastModifiedSync() {
+        return this.getStatsSync().mtime;
+    }
+    lastAccessedSync() {
+        return this.getStatsSync().atime;
+    }
+    lastChangedSync() {
+        return this.getStatsSync().ctime;
+    }
+    sizeSync() {
+        return this.getStatsSync().size;
+    }
+    isWritable() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.access(fs_1.constants.W_OK);
+        });
+    }
+    isReadable() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.access(fs_1.constants.R_OK);
+        });
+    }
+    isExecutable() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.access(fs_1.constants.X_OK);
+        });
+    }
+    delete() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return fsp.unlink(this.pathname);
+        });
+    }
+    exists() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.access(fs_1.constants.R_OK);
+        });
+    }
+    isMatch(globPattern) {
+        const glob = new fileGlob.Minimatch(globPattern, {
+            matchBase: true
+        });
+        return glob.match(this.pathname);
+    }
+    getStatsSync() {
+        return fs_1.statSync(this.pathname);
+    }
+    getStats() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return fsp.stat(this.pathname);
+        });
+    }
+    isHiddenFile() {
+        return (/^\./).test(path.basename(this.pathname));
+    }
+    isHiddenDirectory() {
+        return (/(^|\/)\.[^\/\.]/g).test(this.pathname);
+    }
+    depth(pathname) {
+        return pathname.split(path.sep).length - 1;
+    }
+    access(permission) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield fsp.access(this.pathname, permission);
+            }
+            catch (err) {
+                return false;
+            }
+            return true;
+        });
+    }
+    checkAsyncStats(type) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const stats = yield this.getStats();
+            return stats[type]();
+        });
+    }
+}
+exports.File = File;
+</code></pre>
         </article>
     </section>
 
@@ -610,7 +507,7 @@ module.exports.create = File.create;</code></pre>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Mar 10 2017 16:38:57 GMT+0000 (GMT) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Jan 30 2019 20:54:31 GMT+0000 (GMT) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>
