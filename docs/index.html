@@ -24,7 +24,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="File.html">File</a><ul class='methods'><li data-type='method'><a href="File.html#.create">create</a></li><li data-type='method'><a href="File.html#getAbsolutePath">getAbsolutePath</a></li><li data-type='method'><a href="File.html#getCanonicalPath">getCanonicalPath</a></li><li data-type='method'><a href="File.html#getDepthSync">getDepthSync</a></li><li data-type='method'><a href="File.html#getFiles">getFiles</a></li><li data-type='method'><a href="File.html#getFileSync">getFileSync</a></li><li data-type='method'><a href="File.html#getList">getList</a></li><li data-type='method'><a href="File.html#getListSync">getListSync</a></li><li data-type='method'><a href="File.html#getName">getName</a></li><li data-type='method'><a href="File.html#getPathExtension">getPathExtension</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectory">isDirectory</a></li><li data-type='method'><a href="File.html#isDirectorySync">isDirectorySync</a></li><li data-type='method'><a href="File.html#isFileSync">isFileSync</a></li><li data-type='method'><a href="File.html#isHiddenSync">isHiddenSync</a></li><li data-type='method'><a href="File.html#isSocket">isSocket</a></li><li data-type='method'><a href="File.html#isSocketSync">isSocketSync</a></li><li data-type='method'><a href="File.html#rename">rename</a></li><li data-type='method'><a href="File.html#withLock">withLock</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2>
 </nav>
 
 <div id="main">
@@ -52,63 +52,40 @@
 <blockquote>
 <p>Abstract representation of a pathname</p>
 </blockquote>
-<h2>Installation</h2><pre class="prettyprint source"><code>npm install --save file-js</code></pre><h2>Common examples</h2><p>The example below list all files</p>
+<h2>Installation</h2><pre class="prettyprint source"><code>npm install --save file-js</code></pre><h2>Common examples</h2><p>The example below lists all files in <code>myDir</code></p>
 <pre class="prettyprint source lang-js"><code>const File = require('file-js');
 
-const file = File.create('myDir');
-file.getList()
-  then((files) => {
-    files.each(console.log);
-  });</code></pre><h4>Type checking</h4><pre class="prettyprint source lang-js"><code>const pathname = File.create('myFile');
-if (pathname.isFile()) {
+const files = await new File('myDir').getList();
+files.forEach(console.log);</code></pre><h4>Check file types</h4><pre class="prettyprint source lang-js"><code>const pathname = new File('myFile');
+if (await pathname.isFile()) {
   console.log(`process ${pathname}`)
 }</code></pre><h4>List files for a directory</h4><p>Synchronously list files:</p>
-<pre class="prettyprint source lang-js"><code>const dir = File.create('myDirectory');
+<pre class="prettyprint source lang-js"><code>const dir = new File('myDirectory');
 const files = dir.getListSync()
 
 console.log(files.forEach(console.log));</code></pre><p>Asynchronously list files:</p>
-<pre class="prettyprint source lang-js"><code>const dir = File.create('myDirectory');
-dir.getList().each(console.log);</code></pre><h4>File locking</h4><p>Perform operations on a file whilst locked:</p>
-<pre class="prettyprint source lang-js"><code>const fs = require('fs');
-const file = File.create('myFile');
-
-file.withLock(() => {
-  file.isWritable((w_ok) => {
-    if (w_ok) {
-      fs.writeFileSync(file.getAbsolutePath(), 'my data\n');
-    }
-  });
-});</code></pre><h4>Check permissions</h4><p>Check that a pathname has write permission:</p>
-<pre class="prettyprint source lang-js"><code>const file = File.create('myFile');
-file.isWritable((isWritable) => {
-  if (isWritable) {
+<pre class="prettyprint source lang-js"><code>const dir = new File('myDirectory');
+dir.getList().forEach(console.log);</code></pre><h4>Check permissions</h4><p>Check that a pathname has write permission:</p>
+<pre class="prettyprint source lang-js"><code>const file = new File('myFile');
+if (await file.isWritable()) {
     console.log(`Able to write to ${file.getName()}`);
-  }  
-});</code></pre><p>Check that a pathname is executable:</p>
-<pre class="prettyprint source lang-js"><code>const file = File.create('myFile');
-file.isExecutable((isExecutable) => {
-  if (isExecutable) {
+}</code></pre><p>Check that a pathname is executable:</p>
+<pre class="prettyprint source lang-js"><code>const file = new File('myFile');
+if (await file.isExecutable()) {
     console.log(`Able to execute ${file.getName()}`);
-  }
-});</code></pre><h4>Pathname changes and access</h4><p>Get the last time a pathname was modified:</p>
-<pre class="prettyprint source lang-js"><code>const file = File.create('myFile');
+}</code></pre><h4>Pathname changes and access</h4><p>Get the last time a pathname was modified:</p>
+<pre class="prettyprint source lang-js"><code>const file = new File('myFile');
 const lastModified = file.lastModifiedSync();
 
 console.log(`${file.getName()} was last modified on ${lastModified}`);</code></pre><p>Get the last time a pathname was accessed:</p>
-<pre class="prettyprint source lang-js"><code>const file = File.create('myFile');
+<pre class="prettyprint source lang-js"><code>const file = new File('myFile');
 const lastAccessed = file.lastAccessedSync();
 
 console.log(`${file.getName()} was last accessed on ${lastAccessed}`);</code></pre><h4>File size</h4><p>Check a file is less than 1k:</p>
-<pre class="prettyprint source lang-js"><code>const file = File.create('myFile');
+<pre class="prettyprint source lang-js"><code>const file = new File('myFile');
 if (file.sizeSync() &lt; 1024) {
   console.log(`${file.getName()} &lt; 1k`);
-}</code></pre><h4>Supports callbacks</h4><p>Get list of files for a directory:</p>
-<pre class="prettyprint source lang-js"><code>const dir = File.create('myDir');
-dir.getList((err, files) => {
-  if (err) return console.error(err);
-
-  console.log(files);
-});</code></pre></article>
+}</code></pre></article>
     </section>
 
 
@@ -121,7 +98,7 @@ dir.getList((err, files) => {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Mar 10 2017 16:38:57 GMT+0000 (GMT) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Jan 30 2019 20:54:31 GMT+0000 (GMT) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>
