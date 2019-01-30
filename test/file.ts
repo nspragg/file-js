@@ -533,6 +533,7 @@ describe('File', () => {
     });
 
     it('returns false when the file does not have write permission', async () => {
+      fsp.chmodSync(getFixturePath('permissions/notWritable.json'), '444');
       const file = new File(getFixturePath('permissions/notWritable.json'));
       const isWritable = await file.isWritable();
       assert.isFalse(isWritable);
