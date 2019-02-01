@@ -1,8 +1,11 @@
 # file-js
 
 [![NPM downloads](https://img.shields.io/npm/dm/file-js.svg?style=flat)](https://npmjs.org/package/file-js)
-[![Build Status](https://travis-ci.org/nspragg/file-js.svg)](https://travis-ci.org/nspragg/file-js) [![Coverage Status](https://coveralls.io/repos/github/nspragg/file-js/badge.svg?branch=master)](https://coveralls.io/github/nspragg/file-js?branch=master)
-
+[![Build Status](https://travis-ci.org/nspragg/file-js.svg)](https://travis-ci.org/nspragg/file-js) 
+[![Coverage Status](https://coveralls.io/repos/github/nspragg/file-js/badge.svg?branch=master)](https://coveralls.io/github/nspragg/file-js?branch=master)
+![github-issues](https://img.shields.io/github/issues/nspragg/file-js.svg)
+![stars](https://img.shields.io/github/stars/nspragg/file-js.svg)
+![forks](https://img.shields.io/github/forks/nspragg/file-js.svg)
 > Abstract representation of a pathname
 
 * [Installation](#installation)
