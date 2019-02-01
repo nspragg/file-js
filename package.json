@@ -1,6 +1,6 @@
 {
   "name": "file-js",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Abstract representation of a pathname",
   "main": "index.js",
   "scripts": {
@@ -29,7 +29,7 @@
     "promise",
     "fs"
   ],
-  "license": "MIT",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/nspragg/file-js/issues"
   },
