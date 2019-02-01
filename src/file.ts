@@ -1,8 +1,11 @@
 import {
   constants,
+  existsSync,
   readdirSync,
   Stats,
-  statSync
+  statSync,
+  unlink,
+  unlinkSync
 } from 'fs';
 import * as fileGlob from 'minimatch';
 import * as path from 'path';
@@ -515,6 +518,41 @@ export class File {
   }
 
   /**
+   * Recursively delete the folder and contents.
+   *
+   * @memberOf File
+   * @method
+   * deleteRecursively
+   * @return void
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./dir/');
+   * file.deleteRecursively();
+   */
+  public async deleteRecursively(dirPath: string = this.pathname): Promise<void> {
+    if (existsSync(dirPath)) {
+      const files = readdirSync(dirPath);
+      files.forEach(async (file) => {
+        const curPath = `${dirPath}/${file}`;
+
+        if (statSync(curPath).isDirectory()) {
+          return this.deleteRecursively(curPath);
+        }
+
+        try {
+          await fsp.unlink(curPath);
+          if (readdirSync(dirPath).length === 0) {
+            await fsp.rmdir(dirPath);
+          }
+          return;
+        } catch (error) { return; }
+      });
+      return fsp.rmdir(dirPath);
+    }
+  }
+
+  /**
    * Returns true if the file exists
    *
    * @memberOf File
@@ -550,6 +588,14 @@ export class File {
     });
     return glob.match(this.pathname);
   }
+
+  // private deleteDirIfEmpty(dir: string): Promise<void> {
+  //   const data = readdirSync(dir);
+  //   if (data.length === 0) {
+  //     return fsp.rmdir(dir);
+  //   }
+  //   return;
+  // }
 
   private getStatsSync(): Stats {
     return statSync(this.pathname);
