@@ -3,9 +3,7 @@ import {
   existsSync,
   readdirSync,
   Stats,
-  statSync,
-  unlink,
-  unlinkSync
+  statSync
 } from 'fs';
 import * as fileGlob from 'minimatch';
 import * as path from 'path';
@@ -533,6 +531,7 @@ export class File {
   public async deleteRecursively(dirPath: string = this.pathname): Promise<void> {
     if (existsSync(dirPath)) {
       const files = readdirSync(dirPath);
+
       files.forEach(async (file) => {
         const curPath = `${dirPath}/${file}`;
 
@@ -541,8 +540,9 @@ export class File {
         }
 
         try {
+          const isEmptyDir = readdirSync(dirPath).length === 0;
           await fsp.unlink(curPath);
-          if (readdirSync(dirPath).length === 0) {
+          if (isEmptyDir) {
             await fsp.rmdir(dirPath);
           }
           return;
@@ -588,14 +588,6 @@ export class File {
     });
     return glob.match(this.pathname);
   }
-
-  // private deleteDirIfEmpty(dir: string): Promise<void> {
-  //   const data = readdirSync(dir);
-  //   if (data.length === 0) {
-  //     return fsp.rmdir(dir);
-  //   }
-  //   return;
-  // }
 
   private getStatsSync(): Stats {
     return statSync(this.pathname);
