@@ -1,6 +1,5 @@
 import {
   constants,
-  existsSync,
   readdirSync,
   Stats,
   statSync
@@ -529,7 +528,7 @@ export class File {
    * file.deleteRecursively();
    */
   public async deleteRecursively(dirPath: string = this.pathname): Promise<void> {
-    if (existsSync(dirPath)) {
+    if (this.exists()) {
       const files = readdirSync(dirPath);
 
       files.forEach(async (file) => {
