@@ -586,6 +586,7 @@ describe('File', () => {
     });
 
     const fileToDelete = getFixturePath('delete/a.txt');
+
     beforeEach(() => {
       createFile(fileToDelete, {
         duration: 1,
@@ -600,6 +601,55 @@ describe('File', () => {
 
       assert.throws(() => {
         fs.statSync(getFixturePath('delete/a.txt'));
+      }, /ENOENT/);
+    });
+  });
+
+  describe('.deleteRecursively', () => {
+    before(() => {
+      fs.mkdirSync(getFixturePath('delete'));
+    });
+
+    after(() => {
+      if (fs.existsSync('delete')) {
+        fs.rmdirSync(getFixturePath('delete'));
+      }
+    });
+
+    const fileToDelete = getFixturePath('delete/a.txt');
+
+    beforeEach(() => {
+      createFile(fileToDelete, {
+        duration: 1,
+        modifier: 'hours'
+      });
+
+      let filePath = getFixturePath('delete');
+      for (let i = 0; i < 5; i++) {
+        filePath = `${filePath}/subDir_${i}`;
+        const subDirPath = filePath.split('fixtures', filePath.length)[1];
+        const subFile = getFixturePath(`${subDirPath}/subFile_${i}.txt`);
+        const anotherSubFile = getFixturePath(`${subDirPath}/anotherSubFile_${i}.txt`);
+
+        fs.mkdirSync(filePath);
+        createFile(subFile, {
+          duration: 1,
+          modifier: 'hours'
+        });
+        createFile(anotherSubFile, {
+          duration: 1,
+          modifier: 'hours'
+        });
+      }
+    });
+
+    it('recursively deletes a folder and its contents', async () => {
+      const file = new File(getFixturePath('delete/'));
+
+      await file.deleteRecursively();
+
+      assert.throws(() => {
+        fs.statSync(getFixturePath('delete/'));
       }, /ENOENT/);
     });
   });

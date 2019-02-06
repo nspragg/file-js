@@ -515,6 +515,43 @@ export class File {
   }
 
   /**
+   * Recursively delete the folder and contents.
+   *
+   * @memberOf File
+   * @method
+   * deleteRecursively
+   * @return void
+   * @example
+   * import File from 'file-js';
+   *
+   * const file = new File('./dir/');
+   * file.deleteRecursively();
+   */
+  public async deleteRecursively(dirPath: string = this.pathname): Promise<void> {
+    if (this.exists()) {
+      const files = readdirSync(dirPath);
+
+      files.forEach(async (file) => {
+        const curPath = `${dirPath}/${file}`;
+
+        if (statSync(curPath).isDirectory()) {
+          return this.deleteRecursively(curPath);
+        }
+
+        try {
+          const isEmptyDir = readdirSync(dirPath).length === 0;
+          await fsp.unlink(curPath);
+          if (isEmptyDir) {
+            await fsp.rmdir(dirPath);
+          }
+          return;
+        } catch (error) { return; }
+      });
+      return fsp.rmdir(dirPath);
+    }
+  }
+
+  /**
    * Returns true if the file exists
    *
    * @memberOf File
