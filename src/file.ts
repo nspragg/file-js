@@ -1,12 +1,22 @@
 import {
   constants,
+  createReadStream,
+  createWriteStream,
+  existsSync,
+  lstatSync,
   readdirSync,
+  readlinkSync,
   Stats,
-  statSync
+  statSync,
+  symlinkSync
 } from 'fs';
 import * as fileGlob from 'minimatch';
 import * as path from 'path';
 import * as fsp from './fsp';
+
+interface CopyOpts {
+  overwrite?: boolean;
+}
 
 function joinWith(dir: string): (s: string) => string {
   return (file) => {
@@ -551,6 +561,49 @@ export class File {
     }
   }
 
+   /**
+    * Recursively copy the folder and contents.
+    *
+    * @memberOf File
+    * @method
+    * copyRecursively
+    * @return : stringvoid
+    * @example
+    * import File from 'file-js';
+    *
+    * const file = new File('dir/');
+    * file.copyRecursively('destination/');
+    */
+  public async copyRecursively(dest: string, opts?: CopyOpts): Promise<any> {
+    // check if destination directory already exists
+    const directoryExists = existsSync(dest);
+    if (directoryExists && !opts.overwrite) {
+      throw new Error(`Directory: "${dest}" already exists.`);
+    } else if (directoryExists && opts.overwrite) {
+      await this.deleteRecursively(dest);
+    }
+
+    // make destination directory
+    await fsp.mkdir(dest);
+
+    // get source directory files
+    const files = readdirSync(this.pathname);
+
+    // copy source directory contents into destination directory
+    // tslint:disable-next-line:prefer-for-of
+    for (let i = 0; i < files.length; i++) {
+      const current = lstatSync(this.createPath(this.pathname, files[i]));
+      if (current.isSymbolicLink()) {
+        const symlink = readlinkSync(this.createPath(this.pathname, files[i]));
+        symlinkSync(symlink, this.createPath(dest, files[i]));
+      } else {
+        this.copy(this.pathname, dest, files[i]);
+      }
+    }
+
+    return;
+  }
+
   /**
    * Returns true if the file exists
    *
@@ -620,5 +673,17 @@ export class File {
   private async checkAsyncStats(type: string): Promise<boolean> {
     const stats = await this.getStats();
     return stats[type]();
+  }
+
+  private copy(src: string, dest: string, files: string): void {
+    const sourcePath = this.createPath(src, files);
+    const destPath = this.createPath(dest, files);
+    const oldFile = createReadStream(sourcePath);
+    const newFile = createWriteStream(destPath);
+    oldFile.pipe(newFile);
+  }
+
+  private createPath(directory: string, file: string): string {
+    return path.join(directory, file);
   }
 }

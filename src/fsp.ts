@@ -6,4 +6,5 @@ export const access = util.promisify(fs.access);
 export const readdir = util.promisify(fs.readdir);
 export const unlink = util.promisify(fs.unlink);
 export const rmdir = util.promisify(fs.rmdir);
+export const mkdir = util.promisify(fs.mkdir);
 export const chmodSync = fs.chmodSync;

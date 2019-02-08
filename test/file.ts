@@ -45,6 +45,25 @@ function deleteFile(fname: string): void {
   fs.unlinkSync(fname);
 }
 
+function createFileStructure(fixturePath: string): void {
+  let filePath = getFixturePath(fixturePath);
+  for (let i = 0; i < 5; i++) {
+    filePath = `${filePath}/subDir_${i}`;
+    const subDirPath = filePath.split('fixtures', filePath.length)[1];
+    const subFile = getFixturePath(`${subDirPath}/subFile_${i}.txt`);
+    const anotherSubFile = getFixturePath(`${subDirPath}/anotherSubFile_${i}.txt`);
+    fs.mkdirSync(filePath);
+    createFile(subFile, {
+      duration: 1,
+      modifier: 'hours'
+    });
+    createFile(anotherSubFile, {
+      duration: 1,
+      modifier: 'hours'
+    });
+  }
+}
+
 describe('File', () => {
   afterEach(() => {
     sandbox.restore();
@@ -624,23 +643,7 @@ describe('File', () => {
         modifier: 'hours'
       });
 
-      let filePath = getFixturePath('delete');
-      for (let i = 0; i < 5; i++) {
-        filePath = `${filePath}/subDir_${i}`;
-        const subDirPath = filePath.split('fixtures', filePath.length)[1];
-        const subFile = getFixturePath(`${subDirPath}/subFile_${i}.txt`);
-        const anotherSubFile = getFixturePath(`${subDirPath}/anotherSubFile_${i}.txt`);
-
-        fs.mkdirSync(filePath);
-        createFile(subFile, {
-          duration: 1,
-          modifier: 'hours'
-        });
-        createFile(anotherSubFile, {
-          duration: 1,
-          modifier: 'hours'
-        });
-      }
+      createFileStructure('delete');
     });
 
     it('recursively deletes a folder and its contents', async () => {
@@ -651,6 +654,41 @@ describe('File', () => {
       assert.throws(() => {
         fs.statSync(getFixturePath('delete/'));
       }, /ENOENT/);
+    });
+  });
+
+  describe('.copyRecursively', () => {
+    before(() => {
+      fs.mkdirSync(getFixturePath('copySource'));
+    });
+
+    after(() => {
+      if (fs.existsSync('copySource')) {
+        fs.rmdirSync(getFixturePath('copySource'));
+      }
+    });
+
+    const file = getFixturePath('copySource/a.txt');
+
+    beforeEach(() => {
+      createFile(file, {
+        duration: 1,
+        modifier: 'hours'
+      });
+    });
+
+    it('copies a directory and its contents to destination', async () => {
+      const source = new File(getFixturePath('copySource/'));
+      const destinationPath = getFixturePath('copyDest/');
+
+      await source.copyRecursively(destinationPath);
+
+      assert.isTrue(fs.existsSync(destinationPath));
+      assert.exists(fs.statSync(`${destinationPath}a.txt`));
+
+      await source.deleteRecursively();
+      const destination = new File(destinationPath);
+      await destination.deleteRecursively();
     });
   });
 
