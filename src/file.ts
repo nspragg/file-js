@@ -3,7 +3,6 @@ import {
   createReadStream,
   createWriteStream,
   existsSync,
-  lstatSync,
   readdirSync,
   readlinkSync,
   Stats,
@@ -16,6 +15,7 @@ import * as fsp from './fsp';
 
 interface CopyOpts {
   overwrite?: boolean;
+  source?: string;
 }
 
 function joinWith(dir: string): (s: string) => string {
@@ -574,29 +574,34 @@ export class File {
     * const file = new File('dir/');
     * file.copyRecursively('destination/');
     */
-  public async copyRecursively(dest: string, opts: CopyOpts = { overwrite: false }): Promise<void> {
+  public async copyRecursively(destination: string, opts: CopyOpts = { overwrite: false }): Promise<void> {
+    if (!opts.source) { opts.source = this.pathname; }
     // check if destination directory already exists
-    const directoryExists = existsSync(dest);
+    const directoryExists = existsSync(destination);
     if (directoryExists && !opts.overwrite) {
-      throw new Error(`Directory: "${dest}" already exists.`);
+      throw new Error(`Directory: "${destination}" already exists.`);
     } else if (directoryExists && opts.overwrite) {
-      await this.deleteRecursively(dest);
+      await this.deleteRecursively(destination);
     }
 
     // make destination directory
-    await fsp.mkdir(dest);
+    await fsp.mkdir(destination);
 
     // get source directory files
-    const files = readdirSync(this.pathname);
+    const files = readdirSync(opts.source);
 
     // copy source directory contents into destination directory
-    files.forEach((_, i) => {
-      const current = lstatSync(this.createPath(this.pathname, files[i]));
-      if (current.isSymbolicLink()) {
-        const symlink = readlinkSync(this.createPath(this.pathname, files[i]));
-        symlinkSync(symlink, this.createPath(dest, files[i]));
+    files.forEach(async (_, i) => {
+      const current = statSync(this.createPath(opts.source, files[i]));
+      if (current.isDirectory()) {
+        const newSource = this.createPath(opts.source, files[i]);
+        const newDestination = this.createPath(destination, files[i]);
+        return this.copyRecursively(newDestination, { overwrite: opts.overwrite, source: newSource });
+      } else if (current.isSymbolicLink()) {
+        const symlink = readlinkSync(this.createPath(opts.source, files[i]));
+        symlinkSync(symlink, this.createPath(destination, files[i]));
       } else {
-        this.copy(this.pathname, dest, files[i]);
+        this.copy(opts.source, destination, files[i]);
       }
     });
   }
