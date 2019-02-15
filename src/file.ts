@@ -567,14 +567,14 @@ export class File {
     * @memberOf File
     * @method
     * copyRecursively
-    * @return : stringvoid
+    * @return : void
     * @example
     * import File from 'file-js';
     *
     * const file = new File('dir/');
     * file.copyRecursively('destination/');
     */
-  public async copyRecursively(dest: string, opts?: CopyOpts): Promise<any> {
+  public async copyRecursively(dest: string, opts: CopyOpts = { overwrite: false }): Promise<void> {
     // check if destination directory already exists
     const directoryExists = existsSync(dest);
     if (directoryExists && !opts.overwrite) {
@@ -590,8 +590,7 @@ export class File {
     const files = readdirSync(this.pathname);
 
     // copy source directory contents into destination directory
-    // tslint:disable-next-line:prefer-for-of
-    for (let i = 0; i < files.length; i++) {
+    files.forEach((_, i) => {
       const current = lstatSync(this.createPath(this.pathname, files[i]));
       if (current.isSymbolicLink()) {
         const symlink = readlinkSync(this.createPath(this.pathname, files[i]));
@@ -599,9 +598,7 @@ export class File {
       } else {
         this.copy(this.pathname, dest, files[i]);
       }
-    }
-
-    return;
+    });
   }
 
   /**

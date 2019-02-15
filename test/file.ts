@@ -658,9 +658,8 @@ describe('File', () => {
   });
 
   describe('.copyRecursively', () => {
-    before(() => {
-      fs.mkdirSync(getFixturePath('copySource'));
-    });
+    let source;
+    let destinationPath;
 
     after(() => {
       if (fs.existsSync('copySource')) {
@@ -671,24 +670,61 @@ describe('File', () => {
     const file = getFixturePath('copySource/a.txt');
 
     beforeEach(() => {
+      fs.mkdirSync(getFixturePath('copySource'));
       createFile(file, {
         duration: 1,
         modifier: 'hours'
       });
+      source = new File(getFixturePath('copySource/'));
+      destinationPath = getFixturePath('copyDest/');
+    });
+
+    afterEach(async () => {
+      await source.deleteRecursively();
+      const destination = new File(destinationPath);
+      await destination.deleteRecursively();
     });
 
     it('copies a directory and its contents to destination', async () => {
-      const source = new File(getFixturePath('copySource/'));
-      const destinationPath = getFixturePath('copyDest/');
-
       await source.copyRecursively(destinationPath);
 
       assert.isTrue(fs.existsSync(destinationPath));
       assert.exists(fs.statSync(`${destinationPath}a.txt`));
+    });
 
-      await source.deleteRecursively();
-      const destination = new File(destinationPath);
-      await destination.deleteRecursively();
+    describe('overwrite', () => {
+      beforeEach(() => {
+        fs.mkdirSync(destinationPath);
+        const existingFile = getFixturePath('copyDest/originalFile.txt');
+        createFile(existingFile, {
+          duration: 1,
+          modifier: 'hours'
+        });
+      });
+
+      context('true', () => {
+        it('overwrites existing destination when copying', async () => {
+          await source.copyRecursively(destinationPath, { overwrite: true });
+
+          assert.isTrue(fs.existsSync(destinationPath));
+          assert.exists(fs.statSync(`${destinationPath}a.txt`));
+          assert.isFalse(fs.existsSync(`${destinationPath}originalFile.txt`));
+        });
+      });
+
+      context('false', () => {
+        it('does not overwrite existing destination when copying', async () => {
+          try {
+            await source.copyRecursively(destinationPath);
+            throw new Error('Wrong error');
+          } catch (error) {
+            assert.strictEqual(error.message, `Directory: "${destinationPath}" already exists.`);
+            assert.isTrue(fs.existsSync(destinationPath));
+            assert.isTrue(fs.existsSync(`${destinationPath}originalFile.txt`));
+            assert.isFalse(fs.existsSync(`${destinationPath}a.txt`));
+          }
+        });
+      });
     });
   });
 
