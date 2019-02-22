@@ -638,11 +638,7 @@ describe('File', () => {
     const fileToDelete = getFixturePath('delete/a.txt');
 
     beforeEach(() => {
-      createFile(fileToDelete, {
-        duration: 1,
-        modifier: 'hours'
-      });
-
+      createFile(fileToDelete, { duration: 1, modifier: 'hours' });
       createFileStructure('delete');
     });
 
@@ -666,10 +662,7 @@ describe('File', () => {
 
     beforeEach(() => {
       fs.mkdirSync(getFixturePath('shallowCopySource'));
-      createFile(file, {
-        duration: 1,
-        modifier: 'hours'
-      });
+      createFile(file, { duration: 1, modifier: 'hours' });
       shallowCopySource = new File(getFixturePath('shallowCopySource/'));
       destinationPath = getFixturePath('copyDest/');
     });
@@ -703,10 +696,7 @@ describe('File', () => {
       beforeEach(() => {
         fs.mkdirSync(destinationPath);
         const existingFile = getFixturePath('copyDest/originalFile.txt');
-        createFile(existingFile, {
-          duration: 1,
-          modifier: 'hours'
-        });
+        createFile(existingFile, { duration: 1, modifier: 'hours' });
       });
 
       context('true', () => {

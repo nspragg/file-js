@@ -541,6 +541,7 @@ export class File {
     if (this.exists()) {
       const files = readdirSync(dirPath);
 
+      // for (const file of files) {
       files.forEach(async (file) => {
         const curPath = `${dirPath}/${file}`;
 
@@ -554,10 +555,10 @@ export class File {
           if (isEmptyDir) {
             await fsp.rmdir(dirPath);
           }
-          return;
         } catch (error) { return; }
       });
-      return fsp.rmdir(dirPath);
+      // }
+      await fsp.rmdir(dirPath);
     }
   }
 
@@ -588,22 +589,22 @@ export class File {
     await fsp.mkdir(destination);
 
     // get source directory files
-    const files = readdirSync(opts.source);
+    const files = await fsp.readdir(opts.source);
 
     // copy source directory contents into destination directory
-    files.forEach(async (_, i) => {
-      const current = statSync(this.createPath(opts.source, files[i]));
+    for (const i of files.keys()) {
+      const current = await fsp.stat(this.createPath(opts.source, files[i]));
       if (current.isDirectory()) {
         const newSource = this.createPath(opts.source, files[i]);
         const newDestination = this.createPath(destination, files[i]);
         return this.copyRecursively(newDestination, { overwrite: opts.overwrite, source: newSource });
       } else if (current.isSymbolicLink()) {
-        const symlink = readlinkSync(this.createPath(opts.source, files[i]));
-        symlinkSync(symlink, this.createPath(destination, files[i]));
+        const symlink = await fsp.readLink(this.createPath(opts.source, files[i]));
+        await fsp.symLink(symlink, this.createPath(destination, files[i]));
       } else {
         this.copy(opts.source, destination, files[i]);
       }
-    });
+    }
   }
 
   /**
