@@ -4,10 +4,8 @@ import {
   createWriteStream,
   existsSync,
   readdirSync,
-  readlinkSync,
   Stats,
-  statSync,
-  symlinkSync
+  statSync
 } from 'fs';
 import * as fileGlob from 'minimatch';
 import * as path from 'path';
@@ -539,25 +537,23 @@ export class File {
    */
   public async deleteRecursively(dirPath: string = this.pathname): Promise<void> {
     if (this.exists()) {
-      const files = readdirSync(dirPath);
+      const files = await fsp.readdir(dirPath);
 
-      // for (const file of files) {
-      files.forEach(async (file) => {
+      for (const file of files) {
         const curPath = `${dirPath}/${file}`;
 
-        if (statSync(curPath).isDirectory()) {
-          return this.deleteRecursively(curPath);
-        }
-
-        try {
-          const isEmptyDir = readdirSync(dirPath).length === 0;
-          await fsp.unlink(curPath);
-          if (isEmptyDir) {
-            await fsp.rmdir(dirPath);
+        const isDirectory = (await fsp.lstat(curPath)).isDirectory();
+        const isFile = (await fsp.lstat(curPath)).isFile();
+        if (isDirectory) {
+          const hasFiles = (await fsp.readdir(curPath)).length > 0;
+          if (hasFiles) {
+            await this.deleteRecursively(curPath);
           }
-        } catch (error) { return; }
-      });
-      // }
+        }
+        if (isFile) {
+          await fsp.unlink(curPath);
+        }
+      }
       await fsp.rmdir(dirPath);
     }
   }
@@ -597,7 +593,7 @@ export class File {
       if (current.isDirectory()) {
         const newSource = this.createPath(opts.source, files[i]);
         const newDestination = this.createPath(destination, files[i]);
-        return this.copyRecursively(newDestination, { overwrite: opts.overwrite, source: newSource });
+        await this.copyRecursively(newDestination, { overwrite: opts.overwrite, source: newSource });
       } else if (current.isSymbolicLink()) {
         const symlink = await fsp.readLink(this.createPath(opts.source, files[i]));
         await fsp.symLink(symlink, this.createPath(destination, files[i]));
