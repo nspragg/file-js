@@ -45,6 +45,25 @@ function deleteFile(fname: string): void {
   fs.unlinkSync(fname);
 }
 
+function createFileStructure(fixturePath: string, depth: number = 5): void {
+  let filePath = getFixturePath(fixturePath);
+  for (let i = 0; i < depth; i++) {
+    filePath = `${filePath}/subDir_${i}`;
+    const subDirPath = filePath.split('fixtures', filePath.length)[1];
+    const subFile = getFixturePath(`${subDirPath}/subFile_${i}.txt`);
+    const anotherSubFile = getFixturePath(`${subDirPath}/anotherSubFile_${i}.txt`);
+    fs.mkdirSync(filePath);
+    createFile(subFile, {
+      duration: 1,
+      modifier: 'hours'
+    });
+    createFile(anotherSubFile, {
+      duration: 1,
+      modifier: 'hours'
+    });
+  }
+}
+
 describe('File', () => {
   afterEach(() => {
     sandbox.restore();
@@ -619,28 +638,8 @@ describe('File', () => {
     const fileToDelete = getFixturePath('delete/a.txt');
 
     beforeEach(() => {
-      createFile(fileToDelete, {
-        duration: 1,
-        modifier: 'hours'
-      });
-
-      let filePath = getFixturePath('delete');
-      for (let i = 0; i < 5; i++) {
-        filePath = `${filePath}/subDir_${i}`;
-        const subDirPath = filePath.split('fixtures', filePath.length)[1];
-        const subFile = getFixturePath(`${subDirPath}/subFile_${i}.txt`);
-        const anotherSubFile = getFixturePath(`${subDirPath}/anotherSubFile_${i}.txt`);
-
-        fs.mkdirSync(filePath);
-        createFile(subFile, {
-          duration: 1,
-          modifier: 'hours'
-        });
-        createFile(anotherSubFile, {
-          duration: 1,
-          modifier: 'hours'
-        });
-      }
+      createFile(fileToDelete, { duration: 1, modifier: 'hours' });
+      createFileStructure('delete');
     });
 
     it('recursively deletes a folder and its contents', async () => {
@@ -651,6 +650,79 @@ describe('File', () => {
       assert.throws(() => {
         fs.statSync(getFixturePath('delete/'));
       }, /ENOENT/);
+    });
+  });
+
+  describe('.copyRecursively', () => {
+    let shallowCopySource;
+    let deepCopySource;
+    let destinationPath;
+
+    const file = getFixturePath('shallowCopySource/a.txt');
+
+    beforeEach(() => {
+      fs.mkdirSync(getFixturePath('shallowCopySource'));
+      createFile(file, { duration: 1, modifier: 'hours' });
+      shallowCopySource = new File(getFixturePath('shallowCopySource/'));
+      destinationPath = getFixturePath('copyDest/');
+    });
+
+    afterEach(async () => {
+      await shallowCopySource.deleteRecursively();
+      const destination = new File(destinationPath);
+      await destination.deleteRecursively();
+    });
+
+    it('copies a directory and its contents to destination', async () => {
+      await shallowCopySource.copyRecursively(destinationPath);
+
+      assert.isTrue(fs.existsSync(destinationPath));
+      assert.exists(fs.statSync(`${destinationPath}a.txt`));
+    });
+
+    it('deep copies a directory and its sub-contents to destination', async () => {
+      fs.mkdirSync(getFixturePath('deepCopySource'));
+      createFileStructure('deepCopySource', 5);
+      deepCopySource = new File(getFixturePath('deepCopySource/'));
+
+      await deepCopySource.copyRecursively(destinationPath);
+      assert.isTrue(fs.existsSync(destinationPath));
+      assert.isTrue(fs.existsSync(`${destinationPath}subDir_0`));
+
+      await deepCopySource.deleteRecursively();
+    });
+
+    describe('overwrite', () => {
+      beforeEach(() => {
+        fs.mkdirSync(destinationPath);
+        const existingFile = getFixturePath('copyDest/originalFile.txt');
+        createFile(existingFile, { duration: 1, modifier: 'hours' });
+      });
+
+      context('true', () => {
+        it('overwrites existing destination when copying', async () => {
+          await shallowCopySource.copyRecursively(destinationPath, { overwrite: true });
+
+          assert.isTrue(fs.existsSync(destinationPath));
+          assert.exists(fs.statSync(`${destinationPath}a.txt`));
+          assert.isFalse(fs.existsSync(`${destinationPath}originalFile.txt`));
+        });
+      });
+
+      context('false', () => {
+        it('does not overwrite existing destination when copying', async () => {
+          try {
+            await shallowCopySource.copyRecursively(destinationPath);
+          } catch (error) {
+            assert.strictEqual(error.message, `Directory: "${destinationPath}" already exists.`);
+            return;
+          }
+          assert.fail();
+          assert.isTrue(fs.existsSync(destinationPath));
+          assert.isTrue(fs.existsSync(`${destinationPath}originalFile.txt`));
+          assert.isFalse(fs.existsSync(`${destinationPath}a.txt`));
+        });
+      });
     });
   });
 

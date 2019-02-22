@@ -1,5 +1,8 @@
 import {
   constants,
+  createReadStream,
+  createWriteStream,
+  existsSync,
   readdirSync,
   Stats,
   statSync
@@ -7,6 +10,11 @@ import {
 import * as fileGlob from 'minimatch';
 import * as path from 'path';
 import * as fsp from './fsp';
+
+interface CopyOpts {
+  overwrite?: boolean;
+  source?: string;
+}
 
 function joinWith(dir: string): (s: string) => string {
   return (file) => {
@@ -529,25 +537,69 @@ export class File {
    */
   public async deleteRecursively(dirPath: string = this.pathname): Promise<void> {
     if (this.exists()) {
-      const files = readdirSync(dirPath);
+      const files = await fsp.readdir(dirPath);
 
-      files.forEach(async (file) => {
+      for (const file of files) {
         const curPath = `${dirPath}/${file}`;
 
-        if (statSync(curPath).isDirectory()) {
-          return this.deleteRecursively(curPath);
-        }
-
-        try {
-          const isEmptyDir = readdirSync(dirPath).length === 0;
-          await fsp.unlink(curPath);
-          if (isEmptyDir) {
-            await fsp.rmdir(dirPath);
+        const isDirectory = (await fsp.lstat(curPath)).isDirectory();
+        const isFile = (await fsp.lstat(curPath)).isFile();
+        if (isDirectory) {
+          const hasFiles = (await fsp.readdir(curPath)).length > 0;
+          if (hasFiles) {
+            await this.deleteRecursively(curPath);
           }
-          return;
-        } catch (error) { return; }
-      });
-      return fsp.rmdir(dirPath);
+        }
+        if (isFile) {
+          await fsp.unlink(curPath);
+        }
+      }
+      await fsp.rmdir(dirPath);
+    }
+  }
+
+   /**
+    * Recursively copy the folder and contents.
+    *
+    * @memberOf File
+    * @method
+    * copyRecursively
+    * @return : void
+    * @example
+    * import File from 'file-js';
+    *
+    * const file = new File('dir/');
+    * file.copyRecursively('destination/');
+    */
+  public async copyRecursively(destination: string, opts: CopyOpts = { overwrite: false }): Promise<void> {
+    if (!opts.source) { opts.source = this.pathname; }
+    // check if destination directory already exists
+    const directoryExists = existsSync(destination);
+    if (directoryExists && !opts.overwrite) {
+      throw new Error(`Directory: "${destination}" already exists.`);
+    } else if (directoryExists && opts.overwrite) {
+      await this.deleteRecursively(destination);
+    }
+
+    // make destination directory
+    await fsp.mkdir(destination);
+
+    // get source directory files
+    const files = await fsp.readdir(opts.source);
+
+    // copy source directory contents into destination directory
+    for (const i of files.keys()) {
+      const current = await fsp.stat(this.createPath(opts.source, files[i]));
+      if (current.isDirectory()) {
+        const newSource = this.createPath(opts.source, files[i]);
+        const newDestination = this.createPath(destination, files[i]);
+        await this.copyRecursively(newDestination, { overwrite: opts.overwrite, source: newSource });
+      } else if (current.isSymbolicLink()) {
+        const symlink = await fsp.readLink(this.createPath(opts.source, files[i]));
+        await fsp.symLink(symlink, this.createPath(destination, files[i]));
+      } else {
+        this.copy(opts.source, destination, files[i]);
+      }
     }
   }
 
@@ -620,5 +672,17 @@ export class File {
   private async checkAsyncStats(type: string): Promise<boolean> {
     const stats = await this.getStats();
     return stats[type]();
+  }
+
+  private copy(src: string, dest: string, files: string): void {
+    const sourcePath = this.createPath(src, files);
+    const destPath = this.createPath(dest, files);
+    const oldFile = createReadStream(sourcePath);
+    const newFile = createWriteStream(destPath);
+    oldFile.pipe(newFile);
+  }
+
+  private createPath(directory: string, file: string): string {
+    return path.join(directory, file);
   }
 }

@@ -92,3 +92,34 @@ if (file.sizeSync() < 1024) {
   console.log(`${file.getName()} < 1k`);
 }
 ```
+
+#### Recursive delete
+
+Deletes a folder and all of its contents:
+
+```js
+const file = new File('myDir/');
+file.deleteRecursively()
+  .then(() => console.log('myDir/ deleted'))
+  .catch(console.error);
+```
+
+#### Recursive copy
+
+Copies a folder and all of its contents. Optionally overwriting an existing destination:
+
+If `destinationDir/` already exists, you will not be able to copy:
+```js
+const file = new File('sourceDir/');
+file.copyRecursively('destinationDir/')
+  .then(() => console.log('sourceDir/ copied to destinationDir/'))
+  .catch(console.error); // message: 'Directory: "destinationDir/" already exists.'
+```
+
+If `destinationDir/` already exists and you want to overwrite it:
+```js
+const file = new File('sourceDir/');
+file.copyRecursively('destinationDir/', { overwrite: true })
+  .then(() => console.log('sourceDir/ copied to destinationDir/'))
+  .catch(console.error);
+```
