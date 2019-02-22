@@ -713,13 +713,14 @@ describe('File', () => {
         it('does not overwrite existing destination when copying', async () => {
           try {
             await shallowCopySource.copyRecursively(destinationPath);
-            throw new Error('Wrong error');
           } catch (error) {
             assert.strictEqual(error.message, `Directory: "${destinationPath}" already exists.`);
-            assert.isTrue(fs.existsSync(destinationPath));
-            assert.isTrue(fs.existsSync(`${destinationPath}originalFile.txt`));
-            assert.isFalse(fs.existsSync(`${destinationPath}a.txt`));
+            return;
           }
+          assert.fail();
+          assert.isTrue(fs.existsSync(destinationPath));
+          assert.isTrue(fs.existsSync(`${destinationPath}originalFile.txt`));
+          assert.isFalse(fs.existsSync(`${destinationPath}a.txt`));
         });
       });
     });
