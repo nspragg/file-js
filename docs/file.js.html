@@ -416,43 +416,256 @@ class File {
     getPathExtension() {
         return path.extname(this.pathname).substring(1);
     }
+    /**
+     * Returns the last modified date.
+     *
+     * @memberOf File
+     * @method
+     * lastModifiedSync
+     * @return Date
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./tmp.sh');
+     * console.log(file.lastModifiedSync());
+     */
     lastModifiedSync() {
         return this.getStatsSync().mtime;
     }
+    /**
+     * Returns the last the file was accessed.
+     *
+     * @memberOf File
+     * @method
+     * lastAccessedSync
+     * @return Date
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./tmp.sh');
+     * console.log(file.lastAccessedSync());
+     */
     lastAccessedSync() {
         return this.getStatsSync().atime;
     }
+    /**
+     * Returns the last the file was changed.
+     *
+     * @memberOf File
+     * @method
+     * lastChangedSync
+     * @return Date
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./tmp.sh');
+     * console.log(file.lastChangedSync());
+     */
     lastChangedSync() {
         return this.getStatsSync().ctime;
     }
+    /**
+     * Returns the size of the file.
+     *
+     * @memberOf File
+     * @method
+     * sizeSync
+     * @return Date
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./tmp.sh');
+     * console.log(file.sizeSync());
+     */
     sizeSync() {
         return this.getStatsSync().size;
     }
+    /**
+     * Returns true if the file is writable
+     *
+     * @memberOf File
+     * @method
+     * isWritable
+     * @return Boolean
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./tmp.sh');
+     * console.log(file.isWritable());
+     */
     isWritable() {
         return __awaiter(this, void 0, void 0, function* () {
             return this.access(fs_1.constants.W_OK);
         });
     }
+    /**
+     * Returns true if the file is readable
+     *
+     * @memberOf File
+     * @method
+     * isReadable
+     * @return Boolean
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./tmp.sh');
+     * console.log(file.isReadable());
+     */
     isReadable() {
         return __awaiter(this, void 0, void 0, function* () {
             return this.access(fs_1.constants.R_OK);
         });
     }
+    /**
+     * Returns true if the file is executable
+     *
+     * @memberOf File
+     * @method
+     * isExecutable
+     * @return Boolean
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./tmp.sh');
+     * console.log(file.sizeSync());
+     */
     isExecutable() {
         return __awaiter(this, void 0, void 0, function* () {
             return this.access(fs_1.constants.X_OK);
         });
     }
+    /**
+     * Deletes the file.
+     *
+     * @memberOf File
+     * @method
+     * delete
+     * @return void
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./tmp.sh');
+     * file.delete();
+     */
     delete() {
         return __awaiter(this, void 0, void 0, function* () {
             return fsp.unlink(this.pathname);
         });
     }
+    /**
+     * Recursively delete the folder and contents.
+     *
+     * @memberOf File
+     * @method
+     * deleteRecursively
+     * @return void
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./dir/');
+     * file.deleteRecursively();
+     */
+    deleteRecursively(dirPath = this.pathname) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.exists()) {
+                const files = yield fsp.readdir(dirPath);
+                for (const file of files) {
+                    const curPath = `${dirPath}/${file}`;
+                    const isDirectory = (yield fsp.lstat(curPath)).isDirectory();
+                    const isFile = (yield fsp.lstat(curPath)).isFile();
+                    if (isDirectory) {
+                        const hasFiles = (yield fsp.readdir(curPath)).length > 0;
+                        if (hasFiles) {
+                            yield this.deleteRecursively(curPath);
+                        }
+                    }
+                    if (isFile) {
+                        yield fsp.unlink(curPath);
+                    }
+                }
+                yield fsp.rmdir(dirPath);
+            }
+        });
+    }
+    /**
+     * Recursively copy the folder and contents.
+     *
+     * @memberOf File
+     * @method
+     * copyRecursively
+     * @return : void
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('dir/');
+     * file.copyRecursively('destination/');
+     */
+    copyRecursively(destination, opts = { overwrite: false }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!opts.source) {
+                opts.source = this.pathname;
+            }
+            // check if destination directory already exists
+            const directoryExists = fs_1.existsSync(destination);
+            if (directoryExists &amp;&amp; !opts.overwrite) {
+                throw new Error(`Directory: "${destination}" already exists.`);
+            }
+            else if (directoryExists &amp;&amp; opts.overwrite) {
+                yield this.deleteRecursively(destination);
+            }
+            // make destination directory
+            yield fsp.mkdir(destination);
+            // get source directory files
+            const files = yield fsp.readdir(opts.source);
+            // copy source directory contents into destination directory
+            for (const i of files.keys()) {
+                const current = yield fsp.stat(this.createPath(opts.source, files[i]));
+                if (current.isDirectory()) {
+                    const newSource = this.createPath(opts.source, files[i]);
+                    const newDestination = this.createPath(destination, files[i]);
+                    yield this.copyRecursively(newDestination, { overwrite: opts.overwrite, source: newSource });
+                }
+                else if (current.isSymbolicLink()) {
+                    const symlink = yield fsp.readLink(this.createPath(opts.source, files[i]));
+                    yield fsp.symLink(symlink, this.createPath(destination, files[i]));
+                }
+                else {
+                    this.copy(opts.source, destination, files[i]);
+                }
+            }
+        });
+    }
+    /**
+     * Returns true if the file exists
+     *
+     * @memberOf File
+     * @method
+     * exists
+     * @return Boolean
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./tmp.sh');
+     * console.log(file.exists());
+     */
     exists() {
         return __awaiter(this, void 0, void 0, function* () {
             return this.access(fs_1.constants.R_OK);
         });
     }
+    /**
+     * Returns true if the given file glob matches
+     *
+     * @memberOf File
+     * @method
+     * isMatch
+     * @return Boolean
+     * @example
+     * import File from 'file-js';
+     *
+     * const file = new File('./tmp.sh');
+     * console.log(file.isMatch());
+     */
     isMatch(globPattern) {
         const glob = new fileGlob.Minimatch(globPattern, {
             matchBase: true
@@ -493,6 +706,16 @@ class File {
             return stats[type]();
         });
     }
+    copy(src, dest, files) {
+        const sourcePath = this.createPath(src, files);
+        const destPath = this.createPath(dest, files);
+        const oldFile = fs_1.createReadStream(sourcePath);
+        const newFile = fs_1.createWriteStream(destPath);
+        oldFile.pipe(newFile);
+    }
+    createPath(directory, file) {
+        return path.join(directory, file);
+    }
 }
 exports.File = File;
 </code></pre>
@@ -507,7 +730,7 @@ exports.File = File;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Jan 30 2019 20:54:31 GMT+0000 (GMT) using the Minami theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Feb 25 2019 09:57:56 GMT+0000 (GMT) using the Minami theme.
 </footer>
 
 <script>prettyPrint();</script>

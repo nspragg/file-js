@@ -34,6 +34,7 @@ npm install --save file-js
 * Assert file permissions
 * Supports promises
 * Supports synchronous and asynchronous methods
+* Supports recursive operations (copy/delete)
 
 ## Usage
 
